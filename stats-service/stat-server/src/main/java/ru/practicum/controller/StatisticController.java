@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.StatisticDto;
+import ru.practicum.dto.StatisticInfoDto;
 import ru.practicum.service.StatisticServiceImp;
 
 import java.util.List;
@@ -27,10 +28,10 @@ public class StatisticController {
     }
 
     @GetMapping("/stats")
-    public List<StatisticDto> getStatistic(@RequestParam("start") String start,
-                                     @RequestParam("end") String end,
-                                     @RequestParam(value = "uris", required = false) List<String> uris,
-                                     @RequestParam(value = "unique", defaultValue = "false") Boolean unique) {
+    public List<StatisticInfoDto> getStatistic(@RequestParam("start") String start,
+                                               @RequestParam("end") String end,
+                                               @RequestParam(value = "uris", required = false) List<String> uris,
+                                               @RequestParam(value = "unique", defaultValue = "false") Boolean unique) {
         log.info(String.format("Getting statistics start - %s, end - %s, uris - %s, unique - %s", start, end, uris, unique));
         return statisticService.getStatistic(start, end, uris, unique);
     }

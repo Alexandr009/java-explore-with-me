@@ -31,18 +31,25 @@ public class StatisticServiceImp implements StatisticService {
     }
 
     @Override
-    public List<StatisticDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
+    public List<StatisticInfoDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
         if (!uris.isEmpty()){
             //List<StatisticDto> list = new ArrayList<>();
             LocalDateTime startDate = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             LocalDateTime endDate = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
             long tt = statisticRepository.countByTimestampBetween(startDate, endDate);
 
-            List<StatisticInfoDto> list =  statisticRepository.findByTimestampBetween(startDate, endDate);
-            System.out.println(list.size());
+            List<StatisticInfoDto> listStatisticInfoDto =  statisticRepository.findByTimestampBetween(startDate, endDate);
+            return listStatisticInfoDto;
+
+/*
+            List<Statistic> listAll = statisticRepository.getByTimestampBetween();//(startDate, endDate);
+            System.out.println("listAll - " +  listAll.size());
+
             List<Statistic> list1 = statisticRepository.findAll();
             System.out.println(list1.size());
-            return list1.stream().map(mapper::mapStatisticDto).collect(Collectors.toList());
+            //return list1.stream().map(mapper::mapStatisticDto).collect(Collectors.toList());
+
+ */
         }
 
         return null;
