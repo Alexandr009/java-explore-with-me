@@ -32,28 +32,22 @@ public class StatisticServiceImp implements StatisticService {
 
     @Override
     public List<StatisticInfoDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
-        if (!uris.isEmpty()){
-            //List<StatisticDto> list = new ArrayList<>();
-            LocalDateTime startDate = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            LocalDateTime endDate = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            long tt = statisticRepository.countByTimestampBetween(startDate, endDate);
 
-            List<StatisticInfoDto> listStatisticInfoDto =  statisticRepository.findByTimestampBetween(startDate, endDate);
-            return listStatisticInfoDto;
+        LocalDateTime startDate = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTime endDate = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        List<StatisticInfoDto> listStatisticInfoDto;
 
-/*
-            List<Statistic> listAll = statisticRepository.getByTimestampBetween();//(startDate, endDate);
-            System.out.println("listAll - " +  listAll.size());
-
-            List<Statistic> list1 = statisticRepository.findAll();
-            System.out.println(list1.size());
-            //return list1.stream().map(mapper::mapStatisticDto).collect(Collectors.toList());
-
- */
+        if (unique){
+            listStatisticInfoDto =  statisticRepository.findByTimestampBetweenDistinct(startDate, endDate);
+        }else {
+            listStatisticInfoDto =  statisticRepository.findByTimestampBetween(startDate, endDate);
         }
 
-        return null;
-    }
+        if (!uris.isEmpty()){
+            listStatisticInfoDto = listStatisticInfoDto.stream().filter(item -> uris.contains(item.getUri())).collect(Collectors.toList());
+        }
 
+        return listStatisticInfoDto;
+    }
 
 }
