@@ -9,7 +9,6 @@ import ru.practicum.repository.StatisticRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,7 +23,7 @@ public class StatisticServiceImp implements StatisticService {
     }
 
     @Override
-    public StatisticDto saveStatistic (StatisticDto statisticDto) {
+    public StatisticDto saveStatistic(StatisticDto statisticDto) {
 
         Statistic statistic = statisticRepository.save(mapper.mapStatistic(statisticDto));
         return mapper.mapStatisticDto(statistic);
@@ -37,13 +36,13 @@ public class StatisticServiceImp implements StatisticService {
         LocalDateTime endDate = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         List<StatisticInfoDto> listStatisticInfoDto;
 
-        if (unique){
-            listStatisticInfoDto =  statisticRepository.findByTimestampBetweenDistinct(startDate, endDate);
-        }else {
-            listStatisticInfoDto =  statisticRepository.findByTimestampBetween(startDate, endDate);
+        if (unique) {
+            listStatisticInfoDto = statisticRepository.findByTimestampBetweenDistinct(startDate, endDate);
+        } else {
+            listStatisticInfoDto = statisticRepository.findByTimestampBetween(startDate, endDate);
         }
 
-        if (!uris.isEmpty()){
+        if (!uris.isEmpty()) {
             listStatisticInfoDto = listStatisticInfoDto.stream().filter(item -> uris.contains(item.getUri())).collect(Collectors.toList());
         }
 
