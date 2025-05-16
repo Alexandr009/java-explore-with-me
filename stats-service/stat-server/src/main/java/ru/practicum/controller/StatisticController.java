@@ -1,7 +1,9 @@
 package ru.practicum.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.StatisticDto;
 import ru.practicum.dto.StatisticInfoDto;
@@ -11,6 +13,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
+@Validated
 public class StatisticController {
 
     @Autowired
