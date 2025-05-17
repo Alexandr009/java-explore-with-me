@@ -42,7 +42,7 @@ public class StatisticServiceImp implements StatisticService {
             listStatisticInfoDto = statisticRepository.findByTimestampBetween(startDate, endDate);
         }
 
-        if (!uris.isEmpty()) {
+        if (uris != null) {
             listStatisticInfoDto = listStatisticInfoDto.stream().filter(item -> uris.contains(item.getUri())).collect(Collectors.toList());
         }
 
