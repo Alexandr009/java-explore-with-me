@@ -46,6 +46,10 @@ public class StatisticServiceImp implements StatisticService {
             listStatisticInfoDto = listStatisticInfoDto.stream().filter(item -> uris.contains(item.getUri())).collect(Collectors.toList());
         }
 
+        listStatisticInfoDto = listStatisticInfoDto.stream()
+                .sorted((o1, o2) -> o2.getHits().compareTo(o1.getHits()))
+                .collect(Collectors.toList());
+
         return listStatisticInfoDto;
     }
 
