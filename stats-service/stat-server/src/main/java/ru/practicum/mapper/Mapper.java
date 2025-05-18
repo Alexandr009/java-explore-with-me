@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class Mapper {
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
     public Statistic mapStatistic(StatisticDto statistic) {
         Statistic statisticModel = new Statistic();
         statisticModel.setIp(statistic.getIp());
