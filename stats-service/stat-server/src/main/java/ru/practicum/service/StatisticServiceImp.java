@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class StatisticServiceImp implements StatisticService {
     private final StatisticRepository statisticRepository;
     private final Mapper mapper;
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     public StatisticServiceImp(StatisticRepository statisticRepository, Mapper mapper) {
         this.statisticRepository = statisticRepository;
@@ -31,9 +32,9 @@ public class StatisticServiceImp implements StatisticService {
 
     @Override
     public List<StatisticInfoDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
-
-        LocalDateTime startDate = LocalDateTime.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        LocalDateTime endDate = LocalDateTime.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+        LocalDateTime startDate = LocalDateTime.parse(start, formatter);
+        LocalDateTime endDate = LocalDateTime.parse(end, formatter);
         List<StatisticInfoDto> listStatisticInfoDto;
 
         if (unique) {
