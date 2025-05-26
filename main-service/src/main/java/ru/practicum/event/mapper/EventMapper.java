@@ -51,6 +51,7 @@ public class EventMapper {
         eventFullDto.setState(event.getState());
         eventFullDto.setLocation(new Location(event.getLocationLatitude(),event.getLocationLongitude()));
         eventFullDto.setRequestModeration(event.getRequestModeration());
+        eventFullDto.setPublishedOn(event.getPublishedOn());
         return eventFullDto;
 
     }

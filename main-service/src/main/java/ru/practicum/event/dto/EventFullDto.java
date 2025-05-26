@@ -20,6 +20,7 @@ public class EventFullDto {
     LocalDateTime eventDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime createdOn;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime publishedOn;
     Location location;
     Boolean paid;

@@ -77,32 +77,69 @@ public class EventServiceImp implements EventService {
 
     @Override
     public EventFullDto updateEvent(EventPatchDto eventDto, Integer eventId) {
-        User user = userRepository.findById(eventDto.getInitiator().longValue()).orElseThrow(()-> new NotFoundException(String.format("User Not Found id: %s", eventDto.getInitiator())));
-        Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(()-> new NotFoundException(String.format("Category Not Found id: %s", eventDto.getCategory())));
+        //User user = userRepository.findById(Long.valueOf(eventDto.getInitiator())).orElseThrow(()-> new NotFoundException(String.format("User Not Found id: %s", eventDto.getInitiator())));
+        //Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(()-> new NotFoundException(String.format("Category Not Found id: %s", eventDto.getCategory())));
+        //Event eventOld = eventRepository.findById(Long.valueOf(eventId)).orElseThrow(()-> new NotFoundException((String.format("Event Not Found id: %s", eventId))));
+        Optional<Event> eventCheck = Optional.ofNullable(eventRepository.getEventById(eventId));
+        if (eventCheck.isEmpty()) {
+            throw  new NotFoundException((String.format("Event Not Found id: %s", eventId)));
+        }
+        Event eventOld = eventCheck.get();
         LocalDateTime nowDate = LocalDateTime.now();
         LocalDateTime eventDate = LocalDateTime.parse(eventDto.getEventDate(),
                 DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
         if (eventDate.isBefore(nowDate.plusHours(1))) {
             throw new ValidationException("For the requested operation the conditions are not met.");
         }
-        if (eventDto.getStateAction().equals("PUBLISH_EVENT")) {
+        if (eventOld.getState().equals("PUBLISH")) {
             throw new ValidationException("For the requested operation the conditions are not met.");
         }
 
-        Event newEvent = eventMapper.fromEventPatchtoEvent(eventDto,user,category);
+        if (eventOld.getPaid() != eventDto.getPaid() && eventDto.getPaid() != null) {
+            eventOld.setPaid(eventDto.getPaid());
+        }
+        if (eventOld.getRequestModeration() != eventDto.getRequestModeration() && eventDto.getRequestModeration() != null) {
+            eventOld.setRequestModeration(eventDto.getRequestModeration());
+        }
+        if (!eventOld.getEventDate().equals(eventDto.getEventDate()) && eventDto.getEventDate() != null) {
+            LocalDateTime newEventDate = LocalDateTime.parse(eventDto.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN));
+            eventOld.setEventDate(newEventDate);
+        }
+        if (eventOld.getLocationLatitude() != eventDto.getLocation().getLat() && eventDto.getLocation().getLat() != null) {
+            eventOld.setLocationLatitude(eventDto.getLocation().getLat());
+        }
+        if (eventOld.getLocationLongitude() != eventDto.getLocation().getLon() && eventDto.getLocation().getLon() != null) {
+            eventOld.setLocationLongitude(eventDto.getLocation().getLon());
+        }
+        if (eventOld.getDescription() != eventDto.getDescription() && eventDto.getDescription() != null) {
+            eventOld.setDescription(eventDto.getDescription());
+        }
+        if (eventOld.getAnnotation() != eventDto.getAnnotation() && eventDto.getAnnotation() != null) {
+            eventOld.setAnnotation(eventDto.getAnnotation());
+        }
+        if (eventOld.getParticipantLimit() != eventDto.getParticipantLimit() && eventDto.getParticipantLimit() != null) {
+            eventOld.setParticipantLimit(eventDto.getParticipantLimit());
+        }
+        if (eventOld.getTitle() != eventDto.getTitle() && eventDto.getTitle() != null) {
+            eventOld.setTitle(eventDto.getTitle());
+        }
+
         if (eventDto.getStateAction() != null) {
             switch (eventDto.getStateAction()) {
                 case "SEND_TO_REVIEW":
-                    newEvent.setState(EventState.PENDING);
+                    eventOld.setState(EventState.PENDING);
                     break;
                 case "CANCEL_REVIEW":
-                    newEvent.setState(EventState.CANCELED);
+                    eventOld.setState(EventState.CANCELED);
+                    break;
+                case "PUBLISH_EVENT":
+                    eventOld.setState(EventState.PUBLISHED);
+                    eventOld.setPublishedOn(LocalDateTime.now());
                     break;
             }
         }
-        newEvent.setId(eventId);
-        newEvent = eventRepository.save(newEvent);
-        EventFullDto eventFullDto = eventMapper.toEventFullDto(newEvent);
+        eventOld = eventRepository.save(eventOld);
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(eventOld);
         return eventFullDto;
     }
 
