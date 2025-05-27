@@ -39,7 +39,7 @@ public class Event {
     Double locationLongitude;
     Boolean paid;
     @Column(name = "participant_limit")
-    String participantLimit;
+    Integer participantLimit;
     @Column(name = "request_moderation")
     Boolean requestModeration;
     String title;

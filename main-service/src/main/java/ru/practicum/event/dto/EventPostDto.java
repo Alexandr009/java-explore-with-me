@@ -16,7 +16,7 @@ public class EventPostDto {
     String eventDate;
     Location location;
     Boolean paid;
-    String participantLimit;
+    Integer participantLimit;
     Boolean requestModeration;
     String title;
 }

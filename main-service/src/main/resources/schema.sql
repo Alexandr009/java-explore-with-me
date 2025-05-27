@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS events (
     location_latitude DOUBLE PRECISION,
     location_longitude DOUBLE PRECISION,
     paid BOOLEAN NOT NULL,
-    participant_limit VARCHAR,
+    participant_limit INTEGER,
     request_moderation BOOLEAN NOT NULL,
     state VARCHAR,
     created_on TIMESTAMP,

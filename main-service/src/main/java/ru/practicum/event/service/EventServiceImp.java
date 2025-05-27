@@ -1,5 +1,6 @@
 package ru.practicum.event.service;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
@@ -8,6 +9,7 @@ import ru.practicum.event.dto.EventPatchDto;
 import ru.practicum.event.dto.EventPostDto;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.EventParameters;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.NotFoundException;
@@ -18,6 +20,7 @@ import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -141,6 +144,25 @@ public class EventServiceImp implements EventService {
         eventOld = eventRepository.save(eventOld);
         EventFullDto eventFullDto = eventMapper.toEventFullDto(eventOld);
         return eventFullDto;
+    }
+
+    @Override
+    public List<EventFullDto> getEventsWithParameters (EventParameters eventParameters) {
+        checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
+        List<Event> events = eventRepository
+                .getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories(), eventParameters.getRangeStart(), eventParameters.getRangeEnd());
+
+        List<EventFullDto> eventFullDtos = events.stream().map(eventMapper::toEventFullDto).collect(toList());
+        return eventFullDtos;
+
+    }
+
+    private void checkStartEnd(LocalDateTime start, LocalDateTime end) {
+        if (end != null && start != null) {
+            if (end.isBefore(start)) {
+                throw new ValidationException("Incorrectly made request.");
+            }
+        }
     }
 
 }
