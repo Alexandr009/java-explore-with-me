@@ -5,23 +5,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventPostDto;
-import ru.practicum.event.model.Event;
 import ru.practicum.event.service.EventService;
-import ru.practicum.user.model.User;
 import ru.practicum.user.model.UserParameters;
-import ru.practicum.user.service.UserService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/users/")
 public class PrivateEventsController {
-    private final UserService userService;
     private final EventService eventService;
-    public PrivateEventsController(UserService userService, EventService eventService) {
-        this.userService = userService;
+    public PrivateEventsController(EventService eventService) {
         this.eventService = eventService;
     }
 

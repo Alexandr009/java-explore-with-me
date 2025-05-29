@@ -1,5 +1,6 @@
 package ru.practicum.event.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.model.Category;
@@ -10,6 +11,7 @@ import ru.practicum.event.dto.EventPostDto;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventParameters;
+import ru.practicum.event.model.EventParametersPublic;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.NotFoundException;
@@ -22,8 +24,10 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -50,6 +54,7 @@ public class EventServiceImp implements EventService {
         Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(()-> new NotFoundException(String.format("Category Not Found id: %s", eventDto.getCategory())));
         Event newEvent = eventMapper.toEvent(eventDto,user,category);
         newEvent.setState(EventState.PENDING);
+        newEvent.setCreatedOn(LocalDateTime.now());
         //newEvent.setCreatedOn();
         //newEvent.setPublishedOn();
         newEvent = eventRepository.save(newEvent);
@@ -88,12 +93,27 @@ public class EventServiceImp implements EventService {
             throw  new NotFoundException((String.format("Event Not Found id: %s", eventId)));
         }
         Event eventOld = eventCheck.get();
-        LocalDateTime nowDate = LocalDateTime.now();
-        LocalDateTime eventDate = LocalDateTime.parse(eventDto.getEventDate(),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        if (eventDate.isBefore(nowDate.plusHours(1))) {
-            throw new ValidationException("For the requested operation the conditions are not met.");
+
+        if (eventDto.getEventDate() != null) {
+            LocalDateTime newEventDate = LocalDateTime.parse(eventDto.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN));
+            eventOld.setEventDate(newEventDate);
+
+            checkTimeEvent(eventOld);
         }
+
+        //LocalDateTime nowDate = LocalDateTime.now();
+        //LocalDateTime eventDate = LocalDateTime.parse(eventDto.getEventDate(),
+          //      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+//        if (eventDate.isBefore(nowDate.plusHours(1))) {
+//            throw new ValidationException("For the requested operation the conditions are not met.");
+//        }
+
+//        if (!eventOld.getEventDate().equals(eventDto.getEventDate()) && eventDto.getEventDate() != null) {
+//            LocalDateTime newEventDate = LocalDateTime.parse(eventDto.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN));
+//            eventOld.setEventDate(newEventDate);
+//        }
+
         if (eventOld.getState().equals("PUBLISH")) {
             throw new ValidationException("For the requested operation the conditions are not met.");
         }
@@ -104,14 +124,11 @@ public class EventServiceImp implements EventService {
         if (eventOld.getRequestModeration() != eventDto.getRequestModeration() && eventDto.getRequestModeration() != null) {
             eventOld.setRequestModeration(eventDto.getRequestModeration());
         }
-        if (!eventOld.getEventDate().equals(eventDto.getEventDate()) && eventDto.getEventDate() != null) {
-            LocalDateTime newEventDate = LocalDateTime.parse(eventDto.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN));
-            eventOld.setEventDate(newEventDate);
-        }
-        if (eventOld.getLocationLatitude() != eventDto.getLocation().getLat() && eventDto.getLocation().getLat() != null) {
+
+        if (eventDto.getLocation() != null) {
             eventOld.setLocationLatitude(eventDto.getLocation().getLat());
         }
-        if (eventOld.getLocationLongitude() != eventDto.getLocation().getLon() && eventDto.getLocation().getLon() != null) {
+        if (eventDto.getLocation() != null) {
             eventOld.setLocationLongitude(eventDto.getLocation().getLon());
         }
         if (eventOld.getDescription() != eventDto.getDescription() && eventDto.getDescription() != null) {
@@ -149,12 +166,70 @@ public class EventServiceImp implements EventService {
     @Override
     public List<EventFullDto> getEventsWithParameters (EventParameters eventParameters) {
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
-        List<Event> events = eventRepository
-                .getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories(), eventParameters.getRangeStart(), eventParameters.getRangeEnd());
 
-        List<EventFullDto> eventFullDtos = events.stream().map(eventMapper::toEventFullDto).collect(toList());
+        //Page<Event> events = eventRepository.getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories(), eventParameters.getRangeStart(), eventParameters.getRangeEnd());
+        Page<Event> events = eventRepository.getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories());
+       /* Page<Event> events = eventRepository
+                .getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()),
+                        eventParameters.getUsers(),
+                        eventParameters.getStates(),
+                        eventParameters.getCategories()
+                );
+
+        */
+        Stream<Event> eventStream = events.stream();
+        if (eventParameters.getRangeStart() != null) {
+            eventStream = eventStream.filter(e -> !e.getEventDate().isBefore(eventParameters.getRangeStart()));
+        }
+        if (eventParameters.getRangeEnd() != null) {
+            eventStream = eventStream.filter(e -> !e.getEventDate().isAfter(eventParameters.getRangeEnd()));
+        }
+
+        List<EventFullDto> eventFullDtos = eventStream.map(eventMapper::toEventFullDto).collect(toList());
         return eventFullDtos;
 
+    }
+
+    @Override
+    public List<EventFullDto> getEventsPublic (EventParametersPublic eventParameters) {
+        checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
+        /*List<Event> events = new ArrayList<>(eventRepository.searchEvent(eventParameters.getText(),
+                eventParameters.getCategories(),
+                eventParameters.getPaid(),
+                eventParameters.getRangeStart(),
+                eventParameters.getRangeEnd(),
+                eventParameters.getOnlyAvailable(),
+                PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize())));
+        List<EventFullDto> eventDtos = events.stream()
+                .map(eventMapper::toEventFullDto)
+                .collect(Collectors.toList());
+
+         */
+//
+//        Map<Long, Long> views = defaultStatClientService.getEventsView(events);
+//        Map<Long, Long> confrimeds = getConfirmedRequests(events);
+//        eventDtos.forEach(eventDtoOutShort -> {
+//            eventDtoOutShort.setViews(views.getOrDefault(eventDtoOutShort.getId(), 0L));
+//            eventDtoOutShort.setConfirmedRequests(confrimeds.getOrDefault(eventDtoOutShort.getId(), 0L));
+//        }
+
+        return  null; //eventDtos;
+
+    }
+
+    @Override
+    public EventFullDto getEventPublic(Long eventId) {
+//        defaultStatClientService.createHit(request);
+        Event event = eventRepository.findById(eventId).orElseThrow();
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new NotFoundException(String.format("Not Found event with id: {}", eventId));
+        }
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
+//        Map<Long, Long> views = defaultStatClientService.getEventsView(List.of(event));
+//        Map<Long, Long> confrimeds = getConfirmedRequests(List.of(event));
+//        eventDtoOutFull.setViews(views.getOrDefault(eventId, 0L));
+//        eventDtoOutFull.setConfirmedRequests(confrimeds.getOrDefault(eventId, 0L));
+        return eventFullDto;
     }
 
     private void checkStartEnd(LocalDateTime start, LocalDateTime end) {
@@ -162,6 +237,13 @@ public class EventServiceImp implements EventService {
             if (end.isBefore(start)) {
                 throw new ValidationException("Incorrectly made request.");
             }
+        }
+    }
+
+    private void checkTimeEvent(Event event) {
+        LocalDateTime localDateTime = LocalDateTime.now().plusHours(1);
+        if (event.getEventDate().isBefore(localDateTime)) {
+            throw new ValidationException("For the requested operation the conditions are not met.");
         }
     }
 

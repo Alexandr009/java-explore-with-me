@@ -5,6 +5,7 @@ import ru.practicum.event.dto.EventPatchDto;
 import ru.practicum.event.dto.EventPostDto;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventParameters;
+import ru.practicum.event.model.EventParametersPublic;
 import ru.practicum.user.model.UserParameters;
 
 import java.util.List;
@@ -15,4 +16,6 @@ public interface EventService {
     public EventFullDto getEvent(Integer eventId, Integer userId);
     public EventFullDto updateEvent(EventPatchDto eventDto, Integer eventId);
     public List<EventFullDto> getEventsWithParameters (EventParameters eventParameters);
+    public List<EventFullDto> getEventsPublic (EventParametersPublic eventParameters);
+    public EventFullDto getEventPublic(Long eventId);
 }

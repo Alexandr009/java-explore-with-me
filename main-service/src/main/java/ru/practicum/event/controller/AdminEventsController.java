@@ -40,16 +40,26 @@ public class AdminEventsController {
                                            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeEnd,
                                            @RequestParam(value = "from") Integer from,
                                            @RequestParam(value = "size") Integer size) {
+
+
         EventParameters eventParameters = new EventParameters();
-        eventParameters.setUsers(users != null ?
-                users.stream().map(Long::intValue).collect(Collectors.toList()) : null);
+        //eventParameters.setUsers(users != null ? users.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         eventParameters.setStates(states);
-        eventParameters.setCategories(categories != null ?
-                categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
+        //eventParameters.setCategories(categories != null ? categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         eventParameters.setRangeStart(rangeStart);
         eventParameters.setRangeEnd(rangeEnd);
         eventParameters.setFrom(from);
         eventParameters.setSize(size);
+        if (users != null && users.size() == 1 && users.get(0) == 0L) {
+            eventParameters.setUsers(null);
+        } else {
+            eventParameters.setUsers(users != null ? users.stream().map(Long::intValue).collect(Collectors.toList()) : null);
+        }
+        if (categories != null && categories.size() == 1 && categories.get(0) == 0L) {
+            eventParameters.setCategories(null);
+        } else {
+            eventParameters.setCategories(categories != null ? categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
+        }
         log.info("Getting all the events for {}", eventParameters);
         List<EventFullDto> eventFullDtoList = eventService.getEventsWithParameters(eventParameters);
         return eventFullDtoList;
