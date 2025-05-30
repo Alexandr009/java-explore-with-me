@@ -20,6 +20,7 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,17 +85,59 @@ public class RequestServiceImp implements RequestService {
 
     @Override
     public List<RequestDto> getParticipationRequests(Long userId, Long eventId) {
-        return List.of();
+        List<RequestDto> requestDtoList =  requestRepository.findAllByEvent_Initiator_IdAndEvent_Id(userId, eventId).stream()
+                .map(RequestMapper::toDto)
+                .collect(Collectors.toList());
+        return requestDtoList;
     }
 
     @Override
     public RequestStatusUpdateDto updateParticipationRequest(Long userId, Long eventId, EventRequestStatusUpdateDto eventRequestStatusUpdateDto) {
-        return null;
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException(String.format("request id = %d not found", eventId)));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("user id = %d not found", userId)));
+
+
+        List<Long> requestIds = eventRequestStatusUpdateDto.getRequestIds();
+        StatusRequest status = eventRequestStatusUpdateDto.getStatus();
+
+        List<Request> requests = requestRepository.findAll().stream()
+                .filter(request -> request.getEvent().getId().equals(eventId))
+                .collect(Collectors.toList());
+
+        List<RequestDto> confirmedList = new ArrayList<>();
+        List<RequestDto> rejectedList = new ArrayList<>();
+
+        if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= requestRepository.countAllByEventIdAndStatus(eventId, StatusRequest.CONFIRMED)) {
+            throw new ValidationException("Over limit");
+        }
+
+        if (requestIds != null) {
+            requestIds.forEach(id -> {
+                Request request = requests.stream()
+                        .filter(request1 -> request1.getId().equals(id)).findFirst().orElseThrow(() -> new NotFoundException(String.format("request id = %d not found", id)));
+                if (!request.getStatus().equals(StatusRequest.PENDING)) {
+                    throw new ValidationException("request cannot be confirmed");
+                }
+                if (status.equals(StatusRequest.CONFIRMED)) {
+                    request.setStatus(StatusRequest.CONFIRMED);
+                    confirmedList.add(RequestMapper.toDto(requestRepository.save(request)));
+                } else {
+                    request.setStatus(StatusRequest.REJECTED);
+                    rejectedList.add(RequestMapper.toDto(requestRepository.save(request)));
+                }
+            });
+        }
+        eventRepository.save(event);
+        RequestStatusUpdateDto requestStatusUpdateDto = new RequestStatusUpdateDto(confirmedList, rejectedList);
+        return requestStatusUpdateDto;
     }
 
     @Override
     public RequestDto updateRequestStatus(Long userId, Long requestId) {
-        return null;
+        Request request = requestRepository.findById(requestId).orElseThrow(() -> new NotFoundException(String.format("request id = %d not found", requestId)));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("user id = %d not found", userId)));
+        request.setStatus(StatusRequest.CANCELED);
+        return RequestMapper.toDto(requestRepository.save(request));
     }
 
     @Override

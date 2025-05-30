@@ -28,6 +28,14 @@ public class RequestController {
         return requestDto;
     }
 
+    @PatchMapping("/{userId}/requests/{requestId}/cancel")
+    public RequestDto updateRequest(@PathVariable("userId") Long userId,
+                                                    @PathVariable("requestId") Long requestId) {
+        log.info("Cancel request requestId: " + requestId + " userId: " + userId);
+        RequestDto requestDto = requestService.updateRequestStatus(userId, requestId);
+        return requestDto;
+    }
+
     @GetMapping("/{userId}/requests")
     public List<RequestDto> getRequestsByUser(@PathVariable("userId") Long userId) {
         log.info("Get request by current user with strangers events {}",userId);
