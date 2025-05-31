@@ -7,9 +7,9 @@ import jakarta.persistence.*;
 import java.util.List;
 
 
-@Setter
 @Getter
-@Data
+@Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
