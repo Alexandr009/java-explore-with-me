@@ -8,6 +8,7 @@ import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventPatchDto;
 import ru.practicum.event.dto.EventPostDto;
+import ru.practicum.event.dto.SortEnum;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventParameters;
@@ -22,10 +23,7 @@ import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -163,6 +161,35 @@ public class EventServiceImp implements EventService {
         return eventFullDto;
     }
 
+
+    @Override
+    public EventFullDto updateEventPrivate(Long userId, EventPatchDto eventPatchDto, Long eventId) {
+        Event oldEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(String.format("Event with id = %d not found", eventId)));
+        if (!Objects.equals(oldEvent.getInitiator().getId(), userId)) {
+            throw new ValidationException("Unable to retrieve full event information.");
+        }
+        if (oldEvent.getState().equals(EventState.PUBLISHED)) {
+            throw new ValidationException("Only canceled events can be modified.");
+        }
+        if (eventPatchDto.getEventDate() != null) {
+            oldEvent.setEventDate(LocalDateTime.parse(eventPatchDto.getEventDate(), FORMATTER));
+            checkTimeEvent(oldEvent);
+        }
+        if (eventPatchDto.getStateAction() != null) {
+            switch (eventPatchDto.getStateAction()) {
+                case "SEND_TO_REVIEW":
+                    oldEvent.setState(EventState.PENDING);
+                    break;
+                case "CANCEL_REVIEW":
+                    oldEvent.setState(EventState.CANCELED);
+                    break;
+            }
+        }
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(oldEvent);
+        return eventFullDto;
+    }
+
     @Override
     public List<EventFullDto> getEventsWithParameters (EventParameters eventParameters) {
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
@@ -193,18 +220,29 @@ public class EventServiceImp implements EventService {
     @Override
     public List<EventFullDto> getEventsPublic (EventParametersPublic eventParameters) {
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
-        /*List<Event> events = new ArrayList<>(eventRepository.searchEvent(eventParameters.getText(),
+        List<Event> events = new ArrayList<>(eventRepository.searchEvent(eventParameters.getText(),
                 eventParameters.getCategories(),
                 eventParameters.getPaid(),
-                eventParameters.getRangeStart(),
-                eventParameters.getRangeEnd(),
+                //eventParameters.getRangeStart(),
+                //eventParameters.getRangeEnd(),
                 eventParameters.getOnlyAvailable(),
                 PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize())));
-        List<EventFullDto> eventDtos = events.stream()
+
+        Stream<Event> eventStream = events.stream();
+        if (eventParameters.getRangeStart() != null) {
+            eventStream = eventStream.filter(e -> !e.getEventDate().isBefore(eventParameters.getRangeStart()));
+        }
+        if (eventParameters.getRangeEnd() != null) {
+            eventStream = eventStream.filter(e -> !e.getEventDate().isAfter(eventParameters.getRangeEnd()));
+        }
+
+
+        List<EventFullDto> eventDtos = eventStream
                 .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
 
-         */
+
+
 //
 //        Map<Long, Long> views = defaultStatClientService.getEventsView(events);
 //        Map<Long, Long> confrimeds = getConfirmedRequests(events);
@@ -213,7 +251,18 @@ public class EventServiceImp implements EventService {
 //            eventDtoOutShort.setConfirmedRequests(confrimeds.getOrDefault(eventDtoOutShort.getId(), 0L));
 //        }
 
-        return  null; //eventDtos;
+        if (eventParameters.getSort() != null) {
+            switch (SortEnum.valueOf(eventParameters.getSort())) {
+                case EVENT_DATE:
+                    eventDtos = eventDtos.stream().sorted(Comparator.comparing(EventFullDto::getEventDate)).collect(Collectors.toList());
+                    break;
+                case VIEWS:
+                    eventDtos = eventDtos.stream().sorted(Comparator.comparing(EventFullDto::getViews)).collect(Collectors.toList());
+                    break;
+            }
+        }
+
+        return  eventDtos; //eventDtos;
 
     }
 

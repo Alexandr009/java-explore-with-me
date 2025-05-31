@@ -18,4 +18,5 @@ public interface EventService {
     public List<EventFullDto> getEventsWithParameters (EventParameters eventParameters);
     public List<EventFullDto> getEventsPublic (EventParametersPublic eventParameters);
     public EventFullDto getEventPublic(Long eventId);
+    public EventFullDto updateEventPrivate(Long userId, EventPatchDto eventDto, Long eventId);
 }
