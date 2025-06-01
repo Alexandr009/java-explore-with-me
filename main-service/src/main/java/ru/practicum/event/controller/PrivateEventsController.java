@@ -1,9 +1,11 @@
 package ru.practicum.event.controller;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventPatchDto;
@@ -20,6 +22,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/users/")
+@Validated
 public class PrivateEventsController {
     private final EventService eventService;
     private final RequestServiceImp requestService;

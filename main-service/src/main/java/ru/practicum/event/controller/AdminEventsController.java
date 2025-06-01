@@ -1,7 +1,10 @@
 package ru.practicum.event.controller;
 
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventPatchDto;
@@ -17,7 +20,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("/admin/events")
+@Validated
 public class AdminEventsController {
+    @Autowired
     private final EventService eventService;
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     public AdminEventsController(EventService eventService) {
@@ -26,7 +31,7 @@ public class AdminEventsController {
 
     @PatchMapping("/{eventId}")
     public EventFullDto patchEvent (@PathVariable("eventId") int eventId,
-                                    @RequestBody EventPatchDto eventDto) {
+                                    @Valid @RequestBody EventPatchDto eventDto) {
         log.info("Patching event {}, eventId {} ", eventDto, eventId);
         EventFullDto eventFullDto = eventService.updateEvent(eventDto, eventId);
         return eventFullDto;
@@ -38,8 +43,8 @@ public class AdminEventsController {
                                            @RequestParam(required = false) List<Long> categories,
                                            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeStart,
                                            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeEnd,
-                                           @RequestParam(value = "from") Integer from,
-                                           @RequestParam(value = "size") Integer size) {
+                                           @RequestParam(value = "from", defaultValue = "0") Integer from,
+                                           @RequestParam(value = "size", defaultValue = "10") Integer size) {
 
 
         EventParameters eventParameters = new EventParameters();

@@ -1,10 +1,12 @@
 package ru.practicum.user.controller;
 
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.user.dto.UserFullDto;
 import ru.practicum.user.dto.UserPostDto;
@@ -17,6 +19,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = "/admin/users")
 @Slf4j
+@Validated
 public class UserController {
     @Autowired
     private final UserService userService;
@@ -26,7 +29,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserFullDto createUser(@RequestBody UserPostDto userDto) {
+    public UserFullDto createUser(@RequestBody @Valid UserPostDto userDto) {
         log.info("Creating user: {}", userDto);
         UserFullDto userFullDto = userService.createUser(userDto);
         return  userFullDto;
