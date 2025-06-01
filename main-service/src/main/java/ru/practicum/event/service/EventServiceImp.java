@@ -166,7 +166,8 @@ public class EventServiceImp implements EventService {
     public EventFullDto updateEventPrivate(Long userId, EventPatchDto eventPatchDto, Long eventId) {
         Event oldEvent = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(String.format("Event with id = %d not found", eventId)));
-        if (!Objects.equals(oldEvent.getInitiator().getId(), userId)) {
+        Long initiatorId = Long.valueOf(oldEvent.getInitiator().getId());
+        if (!initiatorId.equals(userId)) {
             throw new ValidationException("Unable to retrieve full event information.");
         }
         if (oldEvent.getState().equals(EventState.PUBLISHED)) {

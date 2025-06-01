@@ -41,7 +41,7 @@ public class RequestServiceImp implements RequestService {
     @Override
     public RequestDto createRequest(Long userId, Long eventId) {
         if (eventId == null || userId == null) {
-            throw new ConditionsNotMetException(String.format("Event ID and/or User ID must not be null. Provided: eventId=%s, userId=%s", eventId, userId));
+            throw new ValidationException(String.format("Event ID and/or User ID must not be null. Provided: eventId=%s, userId=%s", eventId, userId));
         }
 
         if (requestRepository.findByRequester_IdAndEvent_Id(userId, eventId) != null) {
@@ -99,9 +99,17 @@ public class RequestServiceImp implements RequestService {
 
         List<Long> requestIds = eventRequestStatusUpdateDto.getRequestIds();
         StatusRequest status = eventRequestStatusUpdateDto.getStatus();
-
-        List<Request> requests = requestRepository.findAll().stream()
-                .filter(request -> request.getEvent().getId().equals(eventId))
+        // пусто
+//        List<Request> requests = requestRepository.findAll().stream()
+//                .filter(request -> request.getEvent().getId().equals(eventId))
+//                .collect(Collectors.toList());
+//        List<Request> requests = requestRepository.findAllById(requestIds).stream()
+//                .filter(request -> request.getEvent().getId().equals(eventId))
+//                .collect(Collectors.toList());
+        List<Request> requestsAll = requestRepository.findAll();
+        //List<Request> requests2 = requests.stream().filter(request -> request.getId().equals(requestIds.get(0))).collect(Collectors.toList());
+        List<Request> requests = requestsAll.stream()
+                .filter(request -> requestIds.contains(request.getId()))
                 .collect(Collectors.toList());
 
         List<RequestDto> confirmedList = new ArrayList<>();

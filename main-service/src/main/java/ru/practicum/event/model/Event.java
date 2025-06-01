@@ -24,7 +24,7 @@ public class Event {
     @JoinColumn(name = "category_id")
     Category category;
     @ManyToOne(fetch = FetchType.EAGER)
-            @JoinColumn(name = "user_id")
+            @JoinColumn(name = "initiator_id")
     User initiator;
     String description;
     @Column(name = "event_date")

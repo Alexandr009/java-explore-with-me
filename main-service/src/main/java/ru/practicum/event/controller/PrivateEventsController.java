@@ -30,7 +30,7 @@ public class PrivateEventsController {
 
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto createEvent(@PathVariable long userId, @RequestBody EventPostDto eventDto) {
+    public EventFullDto createEvent(@PathVariable long userId, @Valid @RequestBody EventPostDto eventDto) {
         log.info("Creating event for user {} with event {}", userId, eventDto);
         eventDto.setInitiator((int)userId);
         EventFullDto eventNew = eventService.createEvent(eventDto);
