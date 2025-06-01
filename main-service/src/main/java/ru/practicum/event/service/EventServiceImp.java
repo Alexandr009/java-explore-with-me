@@ -58,9 +58,6 @@ public class EventServiceImp implements EventService {
         newEvent.setState(EventState.PENDING);
         newEvent.setCreatedOn(LocalDateTime.now());
         checkTimeEvent(newEvent);
-        if (newEvent.getParticipantLimit() < 0) {
-            throw new ValidationException(String.format("Participant Limit is less than or equal to 0"));
-        }
 
         if (newEvent.getPaid() == null) {
             newEvent.setPaid(false);
@@ -71,6 +68,12 @@ public class EventServiceImp implements EventService {
         if (newEvent.getRequestModeration() == null) {
             newEvent.setRequestModeration(true);
         }
+
+        if (newEvent.getParticipantLimit() < 0) {
+            throw new ValidationException(String.format("Participant Limit is less than or equal to 0"));
+        }
+
+
         newEvent = eventRepository.save(newEvent);
         EventFullDto eventFullDto = eventMapper.toEventFullDto(newEvent);
         return eventFullDto;
