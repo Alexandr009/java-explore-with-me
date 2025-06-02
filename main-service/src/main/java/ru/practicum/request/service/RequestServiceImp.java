@@ -8,6 +8,7 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConditionsNotMetException;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.request.dtro.RequestDto;
@@ -64,7 +65,7 @@ public class RequestServiceImp implements RequestService {
 
         if (event.getParticipantLimit() != 0 &&
                 event.getParticipantLimit() <= requestRepository.countAllByEventIdAndStatus(eventId, StatusRequest.CONFIRMED)) {
-            throw new ValidationException(String.format("Participant limit exceeded for eventId=%d", eventId));
+            throw new ConflictException(String.format("Participant limit exceeded for eventId=%d", eventId));
         }
 
         Request request = new Request();

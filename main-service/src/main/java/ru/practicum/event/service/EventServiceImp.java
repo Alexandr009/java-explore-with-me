@@ -132,10 +132,6 @@ public class EventServiceImp implements EventService {
             throw new ConflictException("Event already REJECTED");
         }
 
-        if (eventDto.getStateAction().equals(EventState.PUBLISHED)) {
-            throw new ConflictException("Event already PUBLISHED");
-        }
-
         if (eventOld.getPaid() != eventDto.getPaid() && eventDto.getPaid() != null) {
             eventOld.setPaid(eventDto.getPaid());
         }
@@ -195,7 +191,7 @@ public class EventServiceImp implements EventService {
             throw new ValidationException("Unable to retrieve full event information.");
         }
         if (oldEvent.getState().equals(EventState.PUBLISHED)) {
-            throw new ValidationException("Only canceled events can be modified.");
+            throw new ConflictException("Only canceled events can be modified.");
         }
         if (eventPatchDto.getEventDate() != null) {
             oldEvent.setEventDate(LocalDateTime.parse(eventPatchDto.getEventDate(), FORMATTER));
