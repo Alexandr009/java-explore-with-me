@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
     Request findByRequester_IdAndEvent_Id(Long userId, Long eventId);
+
     List<Request> findAllByEvent_Initiator_IdAndEvent_Id(long userId, long eventId);
 
     @Query("SELECT new ru.practicum.event.dto.StatsConfirmed(pr.event.id, COUNT(pr.id)) " +

@@ -16,7 +16,7 @@ import java.util.List;
 public class UpdateComplicationDtoIn {
 
     @Size(min = 1, max = 50)
-     String title;
-     List<Long> events;
-     Boolean pinned;
+    String title;
+    List<Long> events;
+    Boolean pinned;
 }

@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserFullDto {
-        String name;
-        String email;
-        Integer id;
+    String name;
+    String email;
+    Integer id;
 }

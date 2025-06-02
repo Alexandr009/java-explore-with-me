@@ -8,7 +8,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventPatchDto;
-import ru.practicum.event.dto.EventPostDto;
 import ru.practicum.event.model.EventParameters;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
@@ -22,16 +21,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/admin/events")
 @Validated
 public class AdminEventsController {
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     @Autowired
     private final EventService eventService;
-    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
     public AdminEventsController(EventService eventService) {
         this.eventService = eventService;
     }
 
     @PatchMapping("/{eventId}")
-    public EventFullDto patchEvent (@PathVariable("eventId") int eventId,
-                                    @Valid @RequestBody EventPatchDto eventDto) {
+    public EventFullDto patchEvent(@PathVariable("eventId") int eventId,
+                                   @Valid @RequestBody EventPatchDto eventDto) {
         log.info("Patching event {}, eventId {} ", eventDto, eventId);
         EventFullDto eventFullDto = eventService.updateEvent(eventDto, eventId);
         return eventFullDto;

@@ -14,8 +14,8 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ComplicationDtoOut {
-     Long id;
-     String title;
-     List<EventFullDto> events;
-     Boolean pinned;
+    Long id;
+    String title;
+    List<EventFullDto> events;
+    Boolean pinned;
 }

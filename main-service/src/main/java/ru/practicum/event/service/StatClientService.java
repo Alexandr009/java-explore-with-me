@@ -2,6 +2,7 @@ package ru.practicum.event.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,6 @@ import ru.practicum.dto.StatisticDto;
 import ru.practicum.dto.StatisticInfoDto;
 import ru.practicum.event.model.Event;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class StatClientService {
 
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final StatisticClient statisticClient;
     private final ObjectMapper objectMapper;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public Map<Long, Long> getEventsView(List<Event> events) {
         Map<Long, Long> views = new HashMap<>();

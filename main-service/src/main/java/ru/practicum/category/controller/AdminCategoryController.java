@@ -1,7 +1,6 @@
 package ru.practicum.category.controller;
 
 import jakarta.validation.Valid;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +15,7 @@ import ru.practicum.category.service.CategoryServiceImp;
 @RequestMapping("/admin/categories")
 public class AdminCategoryController {
     private final CategoryServiceImp categoryService;
+
     public AdminCategoryController(CategoryServiceImp categoryService) {
         this.categoryService = categoryService;
     }

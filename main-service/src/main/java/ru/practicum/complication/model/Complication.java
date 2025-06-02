@@ -1,9 +1,10 @@
 package ru.practicum.complication.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.event.model.Event;
-import jakarta.persistence.*;
+
 import java.util.List;
 
 
@@ -18,14 +19,14 @@ import java.util.List;
 public class Complication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-     Long id;
+    Long id;
     @Column(name = "title")
-     String title;
+    String title;
     @Column(name = "is_pinned")
-     Boolean pinned;
+    Boolean pinned;
     @ManyToMany
     @JoinTable(name = "complication_events",
             joinColumns = {@JoinColumn(name = "complication_id")},
             inverseJoinColumns = {@JoinColumn(name = "events_id")})
-     List<Event> events;
+    List<Event> events;
 }

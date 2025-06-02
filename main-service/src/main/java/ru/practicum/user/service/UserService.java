@@ -8,7 +8,9 @@ import java.util.List;
 
 
 public interface UserService {
-    public UserFullDto createUser(UserPostDto userPostDto);
-    public List<UserFullDto> getUserByParameters(UserParameters userParameters);
-    public void deletedUser(Long userId);
+    UserFullDto createUser(UserPostDto userPostDto);
+
+    List<UserFullDto> getUserByParameters(UserParameters userParameters);
+
+    void deletedUser(Long userId);
 }

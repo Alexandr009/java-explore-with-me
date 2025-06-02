@@ -1,5 +1,6 @@
 package ru.practicum.event.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +8,6 @@ import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.model.EventParametersPublic;
 import ru.practicum.event.service.EventService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/events")
 @RestController
 public class PublicEventsController {
-    private final EventService eventService;
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    private final EventService eventService;
 
     public PublicEventsController(EventService eventService) {
         this.eventService = eventService;
@@ -42,12 +42,11 @@ public class PublicEventsController {
         } else {
             eventParametersPublic.setCategories(categories != null ? categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         }
-        //eventParametersPublic.setPaid(paid != null ? paid : false);
         eventParametersPublic.setPaid(paid);
         eventParametersPublic.setRangeStart(rangeStart);
         eventParametersPublic.setRangeEnd(rangeEnd);
         eventParametersPublic.setOnlyAvailable(onlyAvailable != null ? onlyAvailable : false);
-        eventParametersPublic.setSort(sort != null ? sort : null);
+        eventParametersPublic.setSort(sort);
         eventParametersPublic.setFrom(from);
         eventParametersPublic.setSize(size);
 

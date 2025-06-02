@@ -7,7 +7,6 @@ import ru.practicum.event.dto.EventRequestStatusUpdateDto;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
-import ru.practicum.exception.ConditionsNotMetException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
@@ -32,7 +31,7 @@ public class RequestServiceImp implements RequestService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
 
-    public RequestServiceImp (RequestRepository requestRepository, EventRepository eventRepository, UserRepository userRepository) {
+    public RequestServiceImp(RequestRepository requestRepository, EventRepository eventRepository, UserRepository userRepository) {
         this.requestRepository = requestRepository;
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
@@ -87,7 +86,7 @@ public class RequestServiceImp implements RequestService {
 
     @Override
     public List<RequestDto> getParticipationRequests(Long userId, Long eventId) {
-        List<RequestDto> requestDtoList =  requestRepository.findAllByEvent_Initiator_IdAndEvent_Id(userId, eventId).stream()
+        List<RequestDto> requestDtoList = requestRepository.findAllByEvent_Initiator_IdAndEvent_Id(userId, eventId).stream()
                 .map(RequestMapper::toDto)
                 .collect(Collectors.toList());
         return requestDtoList;
@@ -98,18 +97,11 @@ public class RequestServiceImp implements RequestService {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException(String.format("request id = %d not found", eventId)));
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("user id = %d not found", userId)));
 
-
         List<Long> requestIds = eventRequestStatusUpdateDto.getRequestIds();
         StatusRequest status = eventRequestStatusUpdateDto.getStatus();
-        // пусто
-//        List<Request> requests = requestRepository.findAll().stream()
-//                .filter(request -> request.getEvent().getId().equals(eventId))
-//                .collect(Collectors.toList());
-//        List<Request> requests = requestRepository.findAllById(requestIds).stream()
-//                .filter(request -> request.getEvent().getId().equals(eventId))
-//                .collect(Collectors.toList());
+
         List<Request> requestsAll = requestRepository.findAll();
-        //List<Request> requests2 = requests.stream().filter(request -> request.getId().equals(requestIds.get(0))).collect(Collectors.toList());
+
         List<Request> requests = requestsAll.stream()
                 .filter(request -> requestIds.contains(request.getId()))
                 .collect(Collectors.toList());

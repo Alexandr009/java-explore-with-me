@@ -27,12 +27,6 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserFullDto createUser(UserPostDto userPostDto) {
-//        boolean check = userRepository.findAll().stream()
-//                .map(User::getName)
-//                .anyMatch(user -> user.equals(userPostDto.getName()));
-//        if (check) {
-//            throw new ConflictException("user already exists");
-//        }
         User user = new User();
         user.setName(userPostDto.getName());
         user.setEmail(userPostDto.getEmail());
@@ -48,7 +42,6 @@ public class UserServiceImp implements UserService {
     public List<UserFullDto> getUserByParameters(UserParameters userParameters) {
         List<User> user = userRepository.findAll();
 
-        // Сортируем по ID чтобы последние добавленные были в конце
         user = user.stream()
                 .sorted(Comparator.comparing(User::getId))
                 .collect(Collectors.toList());

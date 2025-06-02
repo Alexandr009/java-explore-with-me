@@ -3,7 +3,6 @@ package ru.practicum.complication.controller;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.complication.dto.ComplicationDtoIn;
 import ru.practicum.complication.dto.ComplicationDtoOut;
@@ -22,7 +21,7 @@ public class AdminComplicationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ComplicationDtoOut createComplication (@Valid @RequestBody ComplicationDtoIn complicationDtoIn) {
+    public ComplicationDtoOut createComplication(@Valid @RequestBody ComplicationDtoIn complicationDtoIn) {
         log.info("Complication with title: " + complicationDtoIn.getTitle() + " saved");
         ComplicationDtoOut complicationDtoOut = complicationService.create(complicationDtoIn);
         return complicationDtoOut;

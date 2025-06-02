@@ -7,13 +7,13 @@ import ru.practicum.category.model.Category;
 
 @Component
 public class CategoryMapper {
-    public Category toCategory (CategoryPostDto postDto) {
+    public Category toCategory(CategoryPostDto postDto) {
         Category category = new Category();
         category.setName(postDto.getName());
         return category;
     }
 
-    public CategoryFullDto toCategoryPostFullDto (Category category) {
+    public CategoryFullDto toCategoryPostFullDto(Category category) {
         CategoryFullDto categoryFullDto = new CategoryFullDto();
         categoryFullDto.setName(category.getName());
         categoryFullDto.setId(category.getId());

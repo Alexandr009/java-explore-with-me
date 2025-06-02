@@ -25,6 +25,6 @@ public class User {
     @Email
     String email;
     @Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
 }

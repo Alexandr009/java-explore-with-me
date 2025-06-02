@@ -10,7 +10,6 @@ import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
-import ru.practicum.exception.ValidationException;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,10 +21,11 @@ public class CategoryServiceImp implements CategoryService {
     private static CategoryRepository categoryRepository;
     private static CategoryMapper categoryMapper;
     private static EventRepository eventRepository;
+
     public CategoryServiceImp(CategoryRepository categoryRepository, CategoryMapper categoryMapper, EventRepository eventRepository) {
-        this.categoryRepository = categoryRepository;
-        this.categoryMapper = categoryMapper;
-        this.eventRepository = eventRepository;
+        CategoryServiceImp.categoryRepository = categoryRepository;
+        CategoryServiceImp.categoryMapper = categoryMapper;
+        CategoryServiceImp.eventRepository = eventRepository;
     }
 
     @Override
@@ -41,7 +41,7 @@ public class CategoryServiceImp implements CategoryService {
 
     @Override
     public CategoryFullDto updateCategory(CategoryPostDto categoryDto, Integer id) {
-        Category category = categoryRepository.findById(id).orElseThrow(()-> new NotFoundException(String.format("Category not found id - %s",id)));
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Category not found id - %s", id)));
         if (category.getName().equals(categoryDto.getName()) && category.getId().equals(id)) {
 
         } else {
@@ -57,10 +57,9 @@ public class CategoryServiceImp implements CategoryService {
 
     @Override
     public CategoryFullDto getCategoryById(Integer id) {
-       Optional<Category> category = Optional.ofNullable(categoryRepository.getCategoriesById(id));
-        if (category.isEmpty())
-        {
-            throw new NotFoundException(String.format("Category not found id - %s",id));
+        Optional<Category> category = Optional.ofNullable(categoryRepository.getCategoriesById(id));
+        if (category.isEmpty()) {
+            throw new NotFoundException(String.format("Category not found id - %s", id));
         }
         return categoryMapper.toCategoryPostFullDto(category.get());
     }
@@ -73,7 +72,7 @@ public class CategoryServiceImp implements CategoryService {
 
     @Override
     public void deleteCategoryById(Integer id) {
-        Category category = categoryRepository.findById(id).orElseThrow(()-> new NotFoundException(String.format("Category not found id - %s",id)));
+        Category category = categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Category not found id - %s", id)));
 
         boolean check = eventRepository.findAll().stream()
                 .map(Event::getCategory)

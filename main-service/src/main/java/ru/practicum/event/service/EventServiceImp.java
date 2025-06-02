@@ -75,7 +75,7 @@ public class EventServiceImp implements EventService {
         }
 
         if (newEvent.getParticipantLimit() < 0) {
-            throw new ValidationException(String.format("Participant Limit is less than or equal to 0"));
+            throw new ValidationException("Participant Limit is less than or equal to 0");
         }
 
 
@@ -107,9 +107,6 @@ public class EventServiceImp implements EventService {
 
     @Override
     public EventFullDto updateEvent(EventPatchDto eventDto, Integer eventId) {
-        //User user = userRepository.findById(Long.valueOf(eventDto.getInitiator())).orElseThrow(()-> new NotFoundException(String.format("User Not Found id: %s", eventDto.getInitiator())));
-        //Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(()-> new NotFoundException(String.format("Category Not Found id: %s", eventDto.getCategory())));
-        //Event eventOld = eventRepository.findById(Long.valueOf(eventId)).orElseThrow(()-> new NotFoundException((String.format("Event Not Found id: %s", eventId))));
         Optional<Event> eventCheck = Optional.ofNullable(eventRepository.getEventById(eventId));
         if (eventCheck.isEmpty()) {
             throw new NotFoundException((String.format("Event Not Found id: %s", eventId)));
@@ -354,7 +351,6 @@ public class EventServiceImp implements EventService {
 
     @Override
     public EventFullDto getEventPublic(Long eventId, HttpServletRequest request) {
-        // Сохраняем статистику обращения
         if (statClientService != null) {
             statClientService.createHit(request);
         }
@@ -368,7 +364,6 @@ public class EventServiceImp implements EventService {
 
         EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
 
-        // Получаем статистику просмотров
         if (statClientService != null) {
             Map<Long, Long> views = statClientService.getEventsView(List.of(event));
             eventFullDto.setViews(Math.toIntExact(views.getOrDefault(eventId, 0L)));
@@ -376,13 +371,12 @@ public class EventServiceImp implements EventService {
             eventFullDto.setViews(0);
         }
 
-        // Получаем количество подтвержденных заявок
         Map<Long, Long> confirmed = getConfirmedRequests(List.of(event));
         eventFullDto.setConfirmedRequests(Math.toIntExact(confirmed.getOrDefault(eventId, 0L)));
 
         return eventFullDto;
     }
-/// ////////////////////////
+
     private void checkStartEnd(LocalDateTime start, LocalDateTime end) {
         if (end != null && start != null) {
             if (end.isBefore(start)) {

@@ -6,6 +6,7 @@ import ru.practicum.complication.dto.ComplicationDtoOut;
 import ru.practicum.complication.model.Complication;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.model.Event;
+
 import java.util.List;
 
 @Component

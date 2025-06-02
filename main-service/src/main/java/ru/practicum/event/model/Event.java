@@ -17,14 +17,14 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Event {
     @Id
-            @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
     String annotation;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     Category category;
     @ManyToOne(fetch = FetchType.EAGER)
-            @JoinColumn(name = "initiator_id")
+    @JoinColumn(name = "initiator_id")
     User initiator;
     String description;
     @Column(name = "event_date")

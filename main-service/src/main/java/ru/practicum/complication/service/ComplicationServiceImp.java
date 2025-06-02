@@ -17,7 +17,6 @@ import ru.practicum.exception.NotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,7 +75,7 @@ public class ComplicationServiceImp implements ComplicationService {
             return complicationDtoOuts;
 
         }
-        complicationDtoOuts =  complicationRepository
+        complicationDtoOuts = complicationRepository
                 .findAllByPinned(pinned, PageRequest.of(from / size, size))
                 .stream()
                 .map(complic -> setComplicationViews(complic.getEvents(), complic))
@@ -95,8 +94,7 @@ public class ComplicationServiceImp implements ComplicationService {
     private ComplicationDtoOut setComplicationViews(List<Event> events, Complication complication) {
         List<EventFullDto> eventFills = new ArrayList<>();
 
-;
-//        if (!events.isEmpty()) {
+        //        if (!events.isEmpty()) {
 //            Map<Long, Long> views = defaultStatClientService.getEventsView(events);
 //            eventFills = events.stream()
 //                    .map(eventMapper::toEventFullDto)
@@ -108,7 +106,7 @@ public class ComplicationServiceImp implements ComplicationService {
 //            );
 //        }
         eventFills = events.stream().map(eventMapper::toEventFullDto).collect(Collectors.toList());
-        ComplicationDtoOut complicationDtoOut = complicationMapper.complicationDtoOut(complication, eventFills);
+        ComplicationDtoOut complicationDtoOut = ComplicationMapper.complicationDtoOut(complication, eventFills);
         return complicationDtoOut;
     }
 }
