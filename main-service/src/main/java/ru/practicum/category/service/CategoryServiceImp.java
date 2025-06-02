@@ -1,5 +1,6 @@
 package ru.practicum.category.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.category.dto.CategoryFullDto;
 import ru.practicum.category.dto.CategoryPostDto;
@@ -16,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class CategoryServiceImp implements CategoryService {
     private static CategoryRepository categoryRepository;
@@ -43,7 +45,7 @@ public class CategoryServiceImp implements CategoryService {
     public CategoryFullDto updateCategory(CategoryPostDto categoryDto, Integer id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Category not found id - %s", id)));
         if (category.getName().equals(categoryDto.getName()) && category.getId().equals(id)) {
-
+            log.info("category update successful");
         } else {
             if (checkNameEvent(categoryDto, Long.valueOf(id))) {
                 throw new ConflictException("Сategory name exists!");
