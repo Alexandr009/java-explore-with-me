@@ -41,35 +41,27 @@ public interface EventRepository extends JpaRepository<Event, Long> {
  */
 
 
-    @Query("""
-    SELECT e FROM Event e
-    WHERE e.state = 'PUBLISHED'
-      AND (:text IS NULL OR :text = '' OR
-           LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%')) OR
-           LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))
-      AND (:categoryIds IS NULL OR e.category.id IN :categoryIds)
-      AND (:paid IS NULL OR e.paid = :paid)
-      AND (
-          COALESCE(:onlyAvailable, false) = false
-          OR e.participantLimit = 0
-          OR (
-              SELECT COUNT(r) FROM Request r
-              WHERE r.status = 'CONFIRMED' AND r.event.id = e.id
-          ) < e.participantLimit
-      )
-    """)
-    List<Event> searchEvent(
-            @Param("text") String text,
-            @Param("categoryIds") List<Integer> categoryIds,
-            @Param("paid") Boolean paid,
-            //@Param("rangeStart") LocalDateTime rangeStart,
-            //@Param("rangeEnd") LocalDateTime rangeEnd,
-            @Param("onlyAvailable") Boolean onlyAvailable,
-            Pageable pageable
-    );
+
+    // Простой метод для получения всех опубликованных событий
+    @Query("SELECT e FROM Event e WHERE e.state = 'PUBLISHED'")
+    List<Event> findAllPublishedEvents(Pageable pageable);
+
+    // Метод без пагинации для получения всех событий
+    @Query("SELECT e FROM Event e WHERE e.state = 'PUBLISHED'")
+    List<Event> findAllPublishedEventsNoPaging();
+
+    // Метод для фильтрации по категориям
+    @Query("SELECT e FROM Event e WHERE e.state = 'PUBLISHED' AND e.category.id IN :categoryIds")
+    List<Event> findPublishedEventsByCategories(@Param("categoryIds") List<Integer> categoryIds, Pageable pageable);
+
+    // Метод для текстового поиска
+    @Query("SELECT e FROM Event e WHERE e.state = 'PUBLISHED' AND " +
+            "(LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%')) OR " +
+            "LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))")
+    List<Event> findPublishedEventsByText(@Param("text") String text, Pageable pageable);
 
 
-
+/// //////////////////////////////
     @Query("SELECT e FROM Event e " +
             "WHERE (:userIds IS NULL OR e.initiator.id IN :userIds) " +
             "AND (:states IS NULL OR e.state IN :states) " +

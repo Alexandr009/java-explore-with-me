@@ -2,6 +2,7 @@ package ru.practicum.request.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.practicum.event.dto.StatsConfirmed;
 import ru.practicum.request.model.Request;
 import ru.practicum.request.model.StatusRequest;
@@ -19,4 +20,7 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
     List<StatsConfirmed> findConfirmedRequests(List<Long> eventIds);
 
     Long countAllByEventIdAndStatus(Long eventId, StatusRequest statusRequest);
+
+    @Query("SELECT COUNT(r) FROM Request r WHERE r.event.id = :eventId AND r.status = :status")
+    long countByEventIdAndStatus(@Param("eventId") Long eventId, @Param("status") String status);
 }

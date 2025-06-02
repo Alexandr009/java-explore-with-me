@@ -10,6 +10,7 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.model.UserParameters;
 import ru.practicum.user.repository.UserRepository;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,11 @@ public class UserServiceImp implements UserService {
     public List<UserFullDto> getUserByParameters(UserParameters userParameters) {
         List<User> user = userRepository.findAll();
 
+        // Сортируем по ID чтобы последние добавленные были в конце
+        user = user.stream()
+                .sorted(Comparator.comparing(User::getId))
+                .collect(Collectors.toList());
+
         if (userParameters.getIds() != null) {
             user = user.stream().filter(u -> userParameters.getIds().contains(u.getId())).collect(Collectors.toList());
         } else {
@@ -50,7 +56,9 @@ public class UserServiceImp implements UserService {
 
     @Override
     public void deletedUser(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(()-> new NotFoundException("User with id " + userId + " not found"));
-        userRepository.deleteById(userId);
+        User user = userRepository
+                .findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
+        userRepository.delete(user);
     }
 }

@@ -24,6 +24,9 @@ public class CategoryServiceImp implements CategoryService {
 
     @Override
     public CategoryFullDto addCategory(CategoryPostDto categoryDto) {
+        if (checkName(categoryDto)) {
+            throw new ValidationException("Сategory exists!");
+        }
         Category category = new Category();
         category.setName(categoryDto.getName());
         CategoryFullDto savedCategory = categoryMapper.toCategoryPostFullDto(categoryRepository.save(category));
@@ -58,5 +61,11 @@ public class CategoryServiceImp implements CategoryService {
     public void deleteCategoryById(Integer id) {
         Category category = categoryRepository.findById(id).orElseThrow(()-> new NotFoundException(String.format("Category not found id - %s",id)));
         categoryRepository.deleteById(id);
+    }
+
+    private boolean checkName(CategoryPostDto categoryDtoIn) {
+        return categoryRepository.findAll().stream()
+                .map(Category::getName)
+                .anyMatch(name -> name.equals(categoryDtoIn.getName()));
     }
 }

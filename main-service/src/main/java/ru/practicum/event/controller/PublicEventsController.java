@@ -32,8 +32,8 @@ public class PublicEventsController {
                                            @RequestParam(required = false) @DateTimeFormat(pattern = DATE_TIME_PATTERN) LocalDateTime rangeEnd,
                                            @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                            @RequestParam(required = false) String sort,
-                                           @RequestParam(required = false) Integer from,
-                                           @RequestParam(required = false) Integer size
+                                           @RequestParam(defaultValue = "0") Integer from,
+                                           @RequestParam(defaultValue = "10") Integer size  // ВАЖНО: должно быть defaultValue = "10"
     ) {
         log.info("Get public events from: " + from + " size: " + size);
         EventParametersPublic eventParametersPublic = new EventParametersPublic();
@@ -44,8 +44,6 @@ public class PublicEventsController {
             eventParametersPublic.setCategories(categories != null ? categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         }
         eventParametersPublic.setPaid(paid != null ? paid : false);
-//        eventParametersPublic.setRangeStart(rangeStart != null ? rangeStart : LocalDateTime.now());
-//        eventParametersPublic.setRangeEnd(rangeEnd != null ? rangeEnd : LocalDateTime.now());
         eventParametersPublic.setRangeStart(rangeStart);
         eventParametersPublic.setRangeEnd(rangeEnd);
         eventParametersPublic.setOnlyAvailable(onlyAvailable != null ? onlyAvailable : false);
