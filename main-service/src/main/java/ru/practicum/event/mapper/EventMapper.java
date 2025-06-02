@@ -16,6 +16,7 @@ import java.time.format.DateTimeFormatter;
 public class EventMapper {
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
+
     public Event toEvent (EventPostDto eventPostDto, User user, Category category) {
         Event event = new Event();
         event.setEventDate(LocalDateTime.parse(eventPostDto.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN)));
@@ -46,14 +47,13 @@ public class EventMapper {
         eventFullDto.setPaid(event.getPaid());
         eventFullDto.setEventDate(event.getEventDate());
         eventFullDto.setCreatedOn(event.getCreatedOn());
-        eventFullDto.setConfirmedRequests(1);
+        eventFullDto.setConfirmedRequests(0); // По умолчанию 0, будет установлено в сервисе
         eventFullDto.setInitiator(event.getInitiator());
         eventFullDto.setState(event.getState());
         eventFullDto.setLocation(new Location(event.getLocationLatitude(),event.getLocationLongitude()));
-        eventFullDto.setRequestModeration(event.getRequestModeration());
         eventFullDto.setPublishedOn(event.getPublishedOn());
+        eventFullDto.setViews(0); // По умолчанию 0, будет установлено в сервисе
         return eventFullDto;
-
     }
 
     public Event fromEventPatchtoEvent (EventPatchDto eventPatchDto, User user, Category category) {
@@ -73,5 +73,4 @@ public class EventMapper {
         event.setTitle(eventPatchDto.getTitle());
         return event;
     }
-
 }

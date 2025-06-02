@@ -6,6 +6,9 @@ import ru.practicum.category.dto.CategoryPostDto;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.event.model.Event;
+import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 
@@ -17,15 +20,17 @@ import java.util.stream.Collectors;
 public class CategoryServiceImp implements CategoryService {
     private static CategoryRepository categoryRepository;
     private static CategoryMapper categoryMapper;
-    public CategoryServiceImp(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
+    private static EventRepository eventRepository;
+    public CategoryServiceImp(CategoryRepository categoryRepository, CategoryMapper categoryMapper, EventRepository eventRepository) {
         this.categoryRepository = categoryRepository;
         this.categoryMapper = categoryMapper;
+        this.eventRepository = eventRepository;
     }
 
     @Override
     public CategoryFullDto addCategory(CategoryPostDto categoryDto) {
         if (checkName(categoryDto)) {
-            throw new ValidationException("Сategory exists!");
+            throw new ConflictException("Сategory exists!");
         }
         Category category = new Category();
         category.setName(categoryDto.getName());
@@ -36,6 +41,12 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public CategoryFullDto updateCategory(CategoryPostDto categoryDto, Integer id) {
         Category category = categoryRepository.findById(id).orElseThrow(()-> new NotFoundException(String.format("Category not found id - %s",id)));
+        if (!category.getId().equals(id) && !category.getName().equals(categoryDto.getName())) {
+            if (checkName(categoryDto)) {
+                throw new ConflictException("Сategory exists!");
+            }
+        }
+
         category.setName(categoryDto.getName());
         CategoryFullDto savedCategory = categoryMapper.toCategoryPostFullDto(categoryRepository.save(category));
         return savedCategory;
@@ -60,6 +71,15 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public void deleteCategoryById(Integer id) {
         Category category = categoryRepository.findById(id).orElseThrow(()-> new NotFoundException(String.format("Category not found id - %s",id)));
+
+        boolean check = eventRepository.findAll().stream()
+                .map(Event::getCategory)
+                .map(Category::getId)
+                .anyMatch(ids -> id == ids);
+        if (check) {
+            throw new ConflictException("Category which have event");
+        }
+
         categoryRepository.deleteById(id);
     }
 

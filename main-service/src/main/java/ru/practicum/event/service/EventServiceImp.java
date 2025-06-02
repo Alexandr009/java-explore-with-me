@@ -1,5 +1,6 @@
 package ru.practicum.event.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,14 +42,16 @@ public class EventServiceImp implements EventService {
     private final EventMapper eventMapper;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
+    private final StatClientService statClientService;
 
 
-    public EventServiceImp(EventRepository eventRepository, UserRepository userRepository, EventMapper eventMapper, CategoryRepository categoryRepository, RequestRepository requestRepository) {
+    public EventServiceImp(EventRepository eventRepository, UserRepository userRepository, EventMapper eventMapper, CategoryRepository categoryRepository, RequestRepository requestRepository, StatClientService statClientService) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.eventMapper = eventMapper;
         this.categoryRepository = categoryRepository;
         this.requestRepository = requestRepository;
+        this.statClientService = statClientService;
     }
 
     @Override
@@ -239,21 +242,16 @@ public class EventServiceImp implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsPublic(EventParametersPublic eventParameters) {
-        log.info("Service received parameters: from={}, size={}", eventParameters.getFrom(), eventParameters.getSize());
-
+    public List<EventFullDto> getEventsPublic(EventParametersPublic eventParameters, HttpServletRequest request) {
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
-
         // ВСЕГДА получаем ВСЕ опубликованные события без ограничений
         List<Event> events = eventRepository.findAllPublishedEventsNoPaging();
-        log.info("Total published events in DB: {}", events.size());
 
         // Фильтрация в Java коде
         Stream<Event> eventStream = events.stream();
 
         // Фильтр по категориям
         if (eventParameters.getCategories() != null && !eventParameters.getCategories().isEmpty()) {
-            log.info("Filtering by categories: {}", eventParameters.getCategories());
             eventStream = eventStream.filter(e ->
                     eventParameters.getCategories().contains(e.getCategory().getId())
             );
@@ -286,6 +284,7 @@ public class EventServiceImp implements EventService {
             eventStream = eventStream.filter(e -> {
                 if (e.getParticipantLimit() == 0) return true;
 
+                // Подсчитываем подтвержденные заявки
                 long confirmedRequests = requestRepository.countByEventIdAndStatus(e.getId().longValue(), "CONFIRMED");
                 return confirmedRequests < e.getParticipantLimit();
             });
@@ -293,27 +292,6 @@ public class EventServiceImp implements EventService {
 
         // Собираем все отфильтрованные события
         List<Event> filteredEvents = eventStream.collect(Collectors.toList());
-        log.info("Events after filtering: {}", filteredEvents.size());
-
-        // ВАЖНО: Если после фильтрации событий меньше чем size, берем дополнительные события
-        if (filteredEvents.size() < eventParameters.getSize()) {
-            log.info("Not enough filtered events, adding more from all events");
-
-            // Получаем все события которые НЕ попали в фильтр
-            List<Event> finalFilteredEvents = filteredEvents;
-            List<Event> remainingEvents = events.stream()
-                    .filter(e -> !finalFilteredEvents.contains(e))
-                    .collect(Collectors.toList());
-
-            // Добавляем недостающие события до нужного размера
-            int needed = eventParameters.getSize() - filteredEvents.size();
-            List<Event> additionalEvents = remainingEvents.stream()
-                    .limit(needed)
-                    .collect(Collectors.toList());
-
-            filteredEvents.addAll(additionalEvents);
-            log.info("Added {} additional events, total now: {}", additionalEvents.size(), filteredEvents.size());
-        }
 
         // Сортировка ПЕРЕД пагинацией
         if (eventParameters.getSort() != null) {
@@ -324,61 +302,108 @@ public class EventServiceImp implements EventService {
                             .collect(Collectors.toList());
                     break;
                 case VIEWS:
-                    // Для views пока не сортируем
-                    break;
+                    // Для сортировки по views сначала преобразуем в DTO
+                    List<EventFullDto> tempDtos = filteredEvents.stream()
+                            .map(eventMapper::toEventFullDto)
+                            .collect(Collectors.toList());
+
+                    // Устанавливаем views и confirmedRequests
+                    Map<Long, Long> confirmed = getConfirmedRequests(filteredEvents);
+                    tempDtos.forEach(eventDto -> {
+                        eventDto.setConfirmedRequests(Math.toIntExact(confirmed.getOrDefault(eventDto.getId().longValue(), 0L)));
+                        if (eventDto.getViews() == null) {
+                            eventDto.setViews(0);
+                        }
+                    });
+
+                    // Сортируем по views
+                    tempDtos = tempDtos.stream()
+                            .sorted(Comparator.comparing(EventFullDto::getViews,
+                                    Comparator.nullsLast(Comparator.naturalOrder())))
+                            .collect(Collectors.toList());
+
+                    // Применяем пагинацию
+                    int from = eventParameters.getFrom();
+                    int size = eventParameters.getSize();
+                    int totalFiltered = tempDtos.size();
+
+                    if (from >= totalFiltered) {
+                        return new ArrayList<>();
+                    }
+
+                    int toIndex = Math.min(from + size, totalFiltered);
+                    return tempDtos.subList(from, toIndex);
             }
         }
 
-        // Применяем пагинацию
+        // Применяем пагинацию для остальных случаев
         int from = eventParameters.getFrom();
         int size = eventParameters.getSize();
         int totalFiltered = filteredEvents.size();
 
-        log.info("Pagination: from={}, size={}, totalFiltered={}", from, size, totalFiltered);
-
         // Если записей меньше чем from, возвращаем пустой список
         if (from >= totalFiltered) {
-            log.info("From >= totalFiltered, returning empty list");
             return new ArrayList<>();
         }
 
         // Берем нужный диапазон
         int toIndex = Math.min(from + size, totalFiltered);
         List<Event> pagedEvents = filteredEvents.subList(from, toIndex);
-        log.info("Returning {} events (from {} to {})", pagedEvents.size(), from, toIndex - 1);
 
         // Преобразуем в DTO
         List<EventFullDto> eventDtos = pagedEvents.stream()
                 .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
 
-        // Устанавливаем количество подтвержденных заявок
+        // Устанавливаем количество подтвержденных заявок и просмотров
         Map<Long, Long> confirmed = getConfirmedRequests(pagedEvents);
+        Map<Long, Long> views;
+
+        if (statClientService != null) {
+            views = statClientService.getEventsView(pagedEvents);
+        } else {
+            views = new HashMap<>();
+        }
+
         eventDtos.forEach(eventDto -> {
             eventDto.setConfirmedRequests(Math.toIntExact(confirmed.getOrDefault(eventDto.getId().longValue(), 0L)));
-            if (eventDto.getViews() == null) {
-                eventDto.setViews(0);
-            }
+            eventDto.setViews(Math.toIntExact(views.getOrDefault(eventDto.getId().longValue(), 0L)));
         });
 
         return eventDtos;
     }
 
     @Override
-    public EventFullDto getEventPublic(Long eventId) {
-//        defaultStatClientService.createHit(request);
-        Event event = eventRepository.findById(eventId).orElseThrow();
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new NotFoundException(String.format("Not Found event with id: {}", eventId));
+    public EventFullDto getEventPublic(Long eventId, HttpServletRequest request) {
+        // Сохраняем статистику обращения
+        if (statClientService != null) {
+            statClientService.createHit(request);
         }
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(String.format("Event with id = %d not found", eventId)));
+
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new NotFoundException(String.format("Event with id = %d not found", eventId));
+        }
+
         EventFullDto eventFullDto = eventMapper.toEventFullDto(event);
-//        Map<Long, Long> views = defaultStatClientService.getEventsView(List.of(event));
-//        Map<Long, Long> confrimeds = getConfirmedRequests(List.of(event));
-//        eventDtoOutFull.setViews(views.getOrDefault(eventId, 0L));
-//        eventDtoOutFull.setConfirmedRequests(confrimeds.getOrDefault(eventId, 0L));
+
+        // Получаем статистику просмотров
+        if (statClientService != null) {
+            Map<Long, Long> views = statClientService.getEventsView(List.of(event));
+            eventFullDto.setViews(Math.toIntExact(views.getOrDefault(eventId, 0L)));
+        } else {
+            eventFullDto.setViews(0);
+        }
+
+        // Получаем количество подтвержденных заявок
+        Map<Long, Long> confirmed = getConfirmedRequests(List.of(event));
+        eventFullDto.setConfirmedRequests(Math.toIntExact(confirmed.getOrDefault(eventId, 0L)));
+
         return eventFullDto;
     }
-
+/// ////////////////////////
     private void checkStartEnd(LocalDateTime start, LocalDateTime end) {
         if (end != null && start != null) {
             if (end.isBefore(start)) {

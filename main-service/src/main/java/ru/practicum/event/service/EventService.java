@@ -1,5 +1,6 @@
 package ru.practicum.event.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventPatchDto;
 import ru.practicum.event.dto.EventPostDto;
@@ -11,12 +12,12 @@ import ru.practicum.user.model.UserParameters;
 import java.util.List;
 
 public interface EventService {
-    public EventFullDto createEvent(EventPostDto eventDto);
-    public List<EventFullDto> getAllEvents(UserParameters userParameters);
-    public EventFullDto getEvent(Integer eventId, Integer userId);
-    public EventFullDto updateEvent(EventPatchDto eventDto, Integer eventId);
-    public List<EventFullDto> getEventsWithParameters (EventParameters eventParameters);
-    public List<EventFullDto> getEventsPublic (EventParametersPublic eventParameters);
-    public EventFullDto getEventPublic(Long eventId);
-    public EventFullDto updateEventPrivate(Long userId, EventPatchDto eventDto, Long eventId);
+    EventFullDto createEvent(EventPostDto eventDto);
+    List<EventFullDto> getAllEvents(UserParameters userParameters);
+    EventFullDto getEvent(Integer eventId, Integer userId);
+    EventFullDto updateEvent(EventPatchDto eventDto, Integer eventId);
+    List<EventFullDto> getEventsWithParameters(EventParameters eventParameters);
+    List<EventFullDto> getEventsPublic(EventParametersPublic eventParameters, HttpServletRequest request);
+    EventFullDto getEventPublic(Long eventId, HttpServletRequest request);
+    EventFullDto updateEventPrivate(Long userId, EventPatchDto eventDto, Long eventId);
 }

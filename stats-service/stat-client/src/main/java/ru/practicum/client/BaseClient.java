@@ -10,11 +10,14 @@ import ru.practicum.dto.StatisticDto;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class BaseClient {
-    protected final RestTemplate restTemplate;
+    protected final RestTemplate rest;
 
-    private static ResponseEntity<Object> buildStatisticResponse(ResponseEntity<Object> response) {
+    public BaseClient(RestTemplate rest) {
+        this.rest = rest;
+    }
+
+    private static ResponseEntity<Object> buildResponse(ResponseEntity<Object> response) {
         if (response.getStatusCode().is2xxSuccessful()) {
             return response;
         }
@@ -27,36 +30,34 @@ public class BaseClient {
         return bodyBuilder.build();
     }
 
-    private HttpHeaders defaultHeader() {
+    private HttpHeaders defaultHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         return headers;
     }
 
-    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path,
-                                                          @io.micrometer.core.lang.Nullable Map<String, Object> parameters, @io.micrometer.core.lang.Nullable T body) {
-        HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeader());
+    private <T> ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, Map<String, Object> parameters, T body) {
+        HttpEntity<T> requestEntity = new HttpEntity<>(body, defaultHeaders());
 
-        ResponseEntity<Object> statisticResponse;
+        ResponseEntity<Object> response;
         try {
             if (parameters != null) {
-                statisticResponse = restTemplate.exchange(path, method, requestEntity, Object.class, parameters);
+                response = rest.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
-                statisticResponse = restTemplate.exchange(path, method, requestEntity, Object.class);
+                response = rest.exchange(path, method, requestEntity, Object.class);
             }
         } catch (HttpStatusCodeException e) {
             return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsString());
         }
-        return buildStatisticResponse(statisticResponse);
+        return buildResponse(response);
     }
 
-    public ResponseEntity<Object> get(@Nullable Map<String, Object> parameters) {
-        return makeAndSendRequest(HttpMethod.GET, "/stats?start={start}&end={end}&uris={uris}&unique={unique}",
-                parameters, null);
+    protected ResponseEntity<Object> get(String path, Map<String, Object> parameters) {
+        return makeAndSendRequest(HttpMethod.GET, path, parameters, null);
     }
 
-    public <T> void post(StatisticDto statisticDto) {
-        makeAndSendRequest(HttpMethod.POST, "/hit", null, statisticDto);
+    protected <T> ResponseEntity<Object> post(String path, T body) {
+        return makeAndSendRequest(HttpMethod.POST, path, null, body);
     }
 }

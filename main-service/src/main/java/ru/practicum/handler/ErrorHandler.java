@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ErrorResponse;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
@@ -35,5 +36,12 @@ public class ErrorHandler {
     public ErrorResponse handle(final Throwable e) {
         log.error("Unexpected error occurred: {}", e.getMessage(), e);
         return new ErrorResponse("error", e.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictException(ConflictException e) {
+        log.error("Conflict exception occurred: {}", e.getMessage(), e);
+        return new ErrorResponse("Conflict", e.getMessage());
     }
 }

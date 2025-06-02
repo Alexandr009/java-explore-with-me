@@ -2,6 +2,7 @@ package ru.practicum.user.service;
 
 
 import org.springframework.stereotype.Service;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.user.dto.UserFullDto;
 import ru.practicum.user.dto.UserPostDto;
@@ -26,9 +27,20 @@ public class UserServiceImp implements UserService {
 
     @Override
     public UserFullDto createUser(UserPostDto userPostDto) {
+//        boolean check = userRepository.findAll().stream()
+//                .map(User::getName)
+//                .anyMatch(user -> user.equals(userPostDto.getName()));
+//        if (check) {
+//            throw new ConflictException("user already exists");
+//        }
         User user = new User();
         user.setName(userPostDto.getName());
         user.setEmail(userPostDto.getEmail());
+        List<User> userCheckEmail = userRepository.findUserByEmail(user.getEmail());
+        if (!userCheckEmail.isEmpty()) {
+            throw new ConflictException("User with this email already exists");
+        }
+
         return mapper.toUserFullDto(userRepository.save(user));
     }
 

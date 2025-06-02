@@ -2,15 +2,13 @@ package ru.practicum.event.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.model.EventParametersPublic;
 import ru.practicum.event.service.EventService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,6 +18,7 @@ import java.util.stream.Collectors;
 public class PublicEventsController {
     private final EventService eventService;
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+
     public PublicEventsController(EventService eventService) {
         this.eventService = eventService;
     }
@@ -33,8 +32,8 @@ public class PublicEventsController {
                                            @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                            @RequestParam(required = false) String sort,
                                            @RequestParam(defaultValue = "0") Integer from,
-                                           @RequestParam(defaultValue = "10") Integer size  // ВАЖНО: должно быть defaultValue = "10"
-    ) {
+                                           @RequestParam(defaultValue = "10") Integer size,
+                                           HttpServletRequest request) {
         log.info("Get public events from: " + from + " size: " + size);
         EventParametersPublic eventParametersPublic = new EventParametersPublic();
         eventParametersPublic.setText(text);
@@ -51,15 +50,14 @@ public class PublicEventsController {
         eventParametersPublic.setFrom(from);
         eventParametersPublic.setSize(size);
 
-        List<EventFullDto> events = eventService.getEventsPublic(eventParametersPublic);
+        List<EventFullDto> events = eventService.getEventsPublic(eventParametersPublic, request);
         return events;
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getEventPub(@PathVariable("id") Long id) {
+    public EventFullDto getEventPub(@PathVariable("id") Long id, HttpServletRequest request) {
         log.info("Get public event id: " + id);
-        EventFullDto eventFullDto = eventService.getEventPublic(id);
+        EventFullDto eventFullDto = eventService.getEventPublic(id, request);
         return eventFullDto;
     }
-
 }
