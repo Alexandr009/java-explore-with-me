@@ -17,6 +17,7 @@ import ru.practicum.event.model.EventParameters;
 import ru.practicum.event.model.EventParametersPublic;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 import ru.practicum.request.repository.RequestRepository;
@@ -122,21 +123,17 @@ public class EventServiceImp implements EventService {
             checkTimeEvent(eventOld);
         }
 
-        //LocalDateTime nowDate = LocalDateTime.now();
-        //LocalDateTime eventDate = LocalDateTime.parse(eventDto.getEventDate(),
-        //      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
-//        if (eventDate.isBefore(nowDate.plusHours(1))) {
-//            throw new ValidationException("For the requested operation the conditions are not met.");
-//        }
+        if (eventOld.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Event already PUBLISHED");
+        }
 
-//        if (!eventOld.getEventDate().equals(eventDto.getEventDate()) && eventDto.getEventDate() != null) {
-//            LocalDateTime newEventDate = LocalDateTime.parse(eventDto.getEventDate(), DateTimeFormatter.ofPattern(DATE_TIME_PATTERN));
-//            eventOld.setEventDate(newEventDate);
-//        }
+        if (eventOld.getState().equals(EventState.REJECT) && eventDto.getStateAction().equals("PUBLISH_EVENT")) {
+            throw new ConflictException("Event already REJECTED");
+        }
 
-        if (eventOld.getState().equals("PUBLISH")) {
-            throw new ValidationException("For the requested operation the conditions are not met.");
+        if (eventDto.getStateAction().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Event already PUBLISHED");
         }
 
         if (eventOld.getPaid() != eventDto.getPaid() && eventDto.getPaid() != null) {
@@ -166,12 +163,16 @@ public class EventServiceImp implements EventService {
         }
 
         if (eventDto.getStateAction() != null) {
-            switch (eventDto.getStateAction()) {
+            String status = eventDto.getStateAction();
+            switch (status) {
                 case "SEND_TO_REVIEW":
                     eventOld.setState(EventState.PENDING);
                     break;
                 case "CANCEL_REVIEW":
                     eventOld.setState(EventState.CANCELED);
+                    break;
+                case "REJECT_EVENT":
+                    eventOld.setState(EventState.REJECT);
                     break;
                 case "PUBLISH_EVENT":
                     eventOld.setState(EventState.PUBLISHED);
@@ -218,16 +219,9 @@ public class EventServiceImp implements EventService {
     public List<EventFullDto> getEventsWithParameters(EventParameters eventParameters) {
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
 
-        //Page<Event> events = eventRepository.getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories(), eventParameters.getRangeStart(), eventParameters.getRangeEnd());
-        Page<Event> events = eventRepository.getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories());
-       /* Page<Event> events = eventRepository
-                .getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()),
-                        eventParameters.getUsers(),
-                        eventParameters.getStates(),
-                        eventParameters.getCategories()
-                );
 
-        */
+        Page<Event> events = eventRepository.getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories());
+
         Stream<Event> eventStream = events.stream();
         if (eventParameters.getRangeStart() != null) {
             eventStream = eventStream.filter(e -> !e.getEventDate().isBefore(eventParameters.getRangeStart()));

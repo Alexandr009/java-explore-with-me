@@ -48,9 +48,7 @@ public class AdminEventsController {
 
 
         EventParameters eventParameters = new EventParameters();
-        //eventParameters.setUsers(users != null ? users.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         eventParameters.setStates(states);
-        //eventParameters.setCategories(categories != null ? categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         eventParameters.setRangeStart(rangeStart);
         eventParameters.setRangeEnd(rangeEnd);
         eventParameters.setFrom(from);
