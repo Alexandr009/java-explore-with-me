@@ -46,7 +46,6 @@ public class AdminEventsController {
                                            @RequestParam(value = "from", defaultValue = "0") Integer from,
                                            @RequestParam(value = "size", defaultValue = "10") Integer size) {
 
-
         EventParameters eventParameters = new EventParameters();
         eventParameters.setStates(states);
         eventParameters.setRangeStart(rangeStart);

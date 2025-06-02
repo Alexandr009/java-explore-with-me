@@ -42,7 +42,8 @@ public class PublicEventsController {
         } else {
             eventParametersPublic.setCategories(categories != null ? categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         }
-        eventParametersPublic.setPaid(paid != null ? paid : false);
+        //eventParametersPublic.setPaid(paid != null ? paid : false);
+        eventParametersPublic.setPaid(paid);
         eventParametersPublic.setRangeStart(rangeStart);
         eventParametersPublic.setRangeEnd(rangeEnd);
         eventParametersPublic.setOnlyAvailable(onlyAvailable != null ? onlyAvailable : false);

@@ -226,28 +226,37 @@ public class EventServiceImp implements EventService {
             eventStream = eventStream.filter(e -> !e.getEventDate().isAfter(eventParameters.getRangeEnd()));
         }
 
-        List<EventFullDto> eventFullDtos = eventStream.map(eventMapper::toEventFullDto).collect(toList());
+        List<Event> filteredEvents = eventStream.collect(Collectors.toList());
+
+        Map<Long, Long> confirmed = getConfirmedRequests(filteredEvents);
+
+        List<EventFullDto> eventFullDtos = filteredEvents.stream()
+                .map(eventMapper::toEventFullDto)
+                .collect(Collectors.toList());
+
+        eventFullDtos.forEach(eventDto -> {
+            eventDto.setConfirmedRequests(Math.toIntExact(confirmed.getOrDefault(eventDto.getId().longValue(), 0L)));
+        });
+
         return eventFullDtos;
 
     }
 
     @Override
     public List<EventFullDto> getEventsPublic(EventParametersPublic eventParameters, HttpServletRequest request) {
+        log.info("EventParametersPublic {}", eventParameters);
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
-        // ВСЕГДА получаем ВСЕ опубликованные события без ограничений
+
         List<Event> events = eventRepository.findAllPublishedEventsNoPaging();
 
-        // Фильтрация в Java коде
         Stream<Event> eventStream = events.stream();
 
-        // Фильтр по категориям
         if (eventParameters.getCategories() != null && !eventParameters.getCategories().isEmpty()) {
             eventStream = eventStream.filter(e ->
                     eventParameters.getCategories().contains(e.getCategory().getId())
             );
         }
 
-        // Фильтр по тексту
         if (eventParameters.getText() != null && !eventParameters.getText().trim().isEmpty()) {
             String searchText = eventParameters.getText().toLowerCase().trim();
             eventStream = eventStream.filter(e ->
@@ -256,12 +265,10 @@ public class EventServiceImp implements EventService {
             );
         }
 
-        // Фильтр по paid
         if (eventParameters.getPaid() != null) {
             eventStream = eventStream.filter(e -> e.getPaid().equals(eventParameters.getPaid()));
         }
 
-        // Фильтр по датам
         if (eventParameters.getRangeStart() != null) {
             eventStream = eventStream.filter(e -> !e.getEventDate().isBefore(eventParameters.getRangeStart()));
         }
@@ -269,21 +276,16 @@ public class EventServiceImp implements EventService {
             eventStream = eventStream.filter(e -> !e.getEventDate().isAfter(eventParameters.getRangeEnd()));
         }
 
-        // Фильтр по доступности
         if (eventParameters.getOnlyAvailable() != null && eventParameters.getOnlyAvailable()) {
             eventStream = eventStream.filter(e -> {
                 if (e.getParticipantLimit() == 0) return true;
-
-                // Подсчитываем подтвержденные заявки
                 long confirmedRequests = requestRepository.countByEventIdAndStatus(e.getId().longValue(), "CONFIRMED");
                 return confirmedRequests < e.getParticipantLimit();
             });
         }
 
-        // Собираем все отфильтрованные события
         List<Event> filteredEvents = eventStream.collect(Collectors.toList());
 
-        // Сортировка ПЕРЕД пагинацией
         if (eventParameters.getSort() != null) {
             switch (SortEnum.valueOf(eventParameters.getSort())) {
                 case EVENT_DATE:
@@ -292,27 +294,24 @@ public class EventServiceImp implements EventService {
                             .collect(Collectors.toList());
                     break;
                 case VIEWS:
-                    // Для сортировки по views сначала преобразуем в DTO
                     List<EventFullDto> tempDtos = filteredEvents.stream()
                             .map(eventMapper::toEventFullDto)
                             .collect(Collectors.toList());
 
-                    // Устанавливаем views и confirmedRequests
                     Map<Long, Long> confirmed = getConfirmedRequests(filteredEvents);
+                    Map<Long, Long> views = statClientService != null ?
+                            statClientService.getEventsView(filteredEvents) : new HashMap<>();
+
                     tempDtos.forEach(eventDto -> {
                         eventDto.setConfirmedRequests(Math.toIntExact(confirmed.getOrDefault(eventDto.getId().longValue(), 0L)));
-                        if (eventDto.getViews() == null) {
-                            eventDto.setViews(0);
-                        }
+                        eventDto.setViews(Math.toIntExact(views.getOrDefault(eventDto.getId().longValue(), 0L)));
                     });
 
-                    // Сортируем по views
                     tempDtos = tempDtos.stream()
                             .sorted(Comparator.comparing(EventFullDto::getViews,
                                     Comparator.nullsLast(Comparator.naturalOrder())))
                             .collect(Collectors.toList());
 
-                    // Применяем пагинацию
                     int from = eventParameters.getFrom();
                     int size = eventParameters.getSize();
                     int totalFiltered = tempDtos.size();
@@ -326,34 +325,24 @@ public class EventServiceImp implements EventService {
             }
         }
 
-        // Применяем пагинацию для остальных случаев
         int from = eventParameters.getFrom();
         int size = eventParameters.getSize();
         int totalFiltered = filteredEvents.size();
 
-        // Если записей меньше чем from, возвращаем пустой список
         if (from >= totalFiltered) {
             return new ArrayList<>();
         }
 
-        // Берем нужный диапазон
         int toIndex = Math.min(from + size, totalFiltered);
         List<Event> pagedEvents = filteredEvents.subList(from, toIndex);
 
-        // Преобразуем в DTO
         List<EventFullDto> eventDtos = pagedEvents.stream()
                 .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
 
-        // Устанавливаем количество подтвержденных заявок и просмотров
         Map<Long, Long> confirmed = getConfirmedRequests(pagedEvents);
-        Map<Long, Long> views;
-
-        if (statClientService != null) {
-            views = statClientService.getEventsView(pagedEvents);
-        } else {
-            views = new HashMap<>();
-        }
+        Map<Long, Long> views = statClientService != null ?
+                statClientService.getEventsView(pagedEvents) : new HashMap<>();
 
         eventDtos.forEach(eventDto -> {
             eventDto.setConfirmedRequests(Math.toIntExact(confirmed.getOrDefault(eventDto.getId().longValue(), 0L)));

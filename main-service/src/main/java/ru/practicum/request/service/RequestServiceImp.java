@@ -55,7 +55,8 @@ public class RequestServiceImp implements RequestService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
 
-        if (event.getInitiator().getId().equals(userId)) {
+        Long initiatorId = Long.valueOf(event.getInitiator().getId());
+        if (initiatorId.equals(userId)) {
             throw new ConflictException(String.format("Event initiator cannot submit a participation request. eventId=%d, userId=%d", eventId, userId));
         }
 
