@@ -44,8 +44,10 @@ public class PublicEventsController {
             eventParametersPublic.setCategories(categories != null ? categories.stream().map(Long::intValue).collect(Collectors.toList()) : null);
         }
         eventParametersPublic.setPaid(paid != null ? paid : false);
-        eventParametersPublic.setRangeStart(rangeStart != null ? rangeStart : LocalDateTime.now());
-        eventParametersPublic.setRangeEnd(rangeEnd != null ? rangeEnd : LocalDateTime.now());
+//        eventParametersPublic.setRangeStart(rangeStart != null ? rangeStart : LocalDateTime.now());
+//        eventParametersPublic.setRangeEnd(rangeEnd != null ? rangeEnd : LocalDateTime.now());
+        eventParametersPublic.setRangeStart(rangeStart);
+        eventParametersPublic.setRangeEnd(rangeEnd);
         eventParametersPublic.setOnlyAvailable(onlyAvailable != null ? onlyAvailable : false);
         eventParametersPublic.setSort(sort != null ? sort : null);
         eventParametersPublic.setFrom(from);

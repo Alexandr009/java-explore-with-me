@@ -17,7 +17,6 @@ import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.request.model.Request;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.model.UserParameters;
@@ -33,13 +32,13 @@ import static java.util.stream.Collectors.toList;
 
 @Service
 public class EventServiceImp implements EventService {
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final EventMapper eventMapper;
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
-    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
 
 
     public EventServiceImp(EventRepository eventRepository, UserRepository userRepository, EventMapper eventMapper, CategoryRepository categoryRepository, RequestRepository requestRepository) {
@@ -52,9 +51,9 @@ public class EventServiceImp implements EventService {
 
     @Override
     public EventFullDto createEvent(EventPostDto eventDto) {
-        User user = userRepository.findById(eventDto.getInitiator().longValue()).orElseThrow(()-> new NotFoundException(String.format("User Not Found id: %s", eventDto.getInitiator())));
-        Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(()-> new NotFoundException(String.format("Category Not Found id: %s", eventDto.getCategory())));
-        Event newEvent = eventMapper.toEvent(eventDto,user,category);
+        User user = userRepository.findById(eventDto.getInitiator().longValue()).orElseThrow(() -> new NotFoundException(String.format("User Not Found id: %s", eventDto.getInitiator())));
+        Category category = categoryRepository.findById(eventDto.getCategory()).orElseThrow(() -> new NotFoundException(String.format("Category Not Found id: %s", eventDto.getCategory())));
+        Event newEvent = eventMapper.toEvent(eventDto, user, category);
         newEvent.setState(EventState.PENDING);
         newEvent.setCreatedOn(LocalDateTime.now());
         checkTimeEvent(newEvent);
@@ -107,7 +106,7 @@ public class EventServiceImp implements EventService {
         //Event eventOld = eventRepository.findById(Long.valueOf(eventId)).orElseThrow(()-> new NotFoundException((String.format("Event Not Found id: %s", eventId))));
         Optional<Event> eventCheck = Optional.ofNullable(eventRepository.getEventById(eventId));
         if (eventCheck.isEmpty()) {
-            throw  new NotFoundException((String.format("Event Not Found id: %s", eventId)));
+            throw new NotFoundException((String.format("Event Not Found id: %s", eventId)));
         }
         Event eventOld = eventCheck.get();
 
@@ -120,7 +119,7 @@ public class EventServiceImp implements EventService {
 
         //LocalDateTime nowDate = LocalDateTime.now();
         //LocalDateTime eventDate = LocalDateTime.parse(eventDto.getEventDate(),
-          //      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        //      DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 
 //        if (eventDate.isBefore(nowDate.plusHours(1))) {
 //            throw new ValidationException("For the requested operation the conditions are not met.");
@@ -211,7 +210,7 @@ public class EventServiceImp implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsWithParameters (EventParameters eventParameters) {
+    public List<EventFullDto> getEventsWithParameters(EventParameters eventParameters) {
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
 
         //Page<Event> events = eventRepository.getEvents(PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize()), eventParameters.getUsers(), eventParameters.getStates(), eventParameters.getCategories(), eventParameters.getRangeStart(), eventParameters.getRangeEnd());
@@ -238,13 +237,11 @@ public class EventServiceImp implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getEventsPublic (EventParametersPublic eventParameters) {
+    public List<EventFullDto> getEventsPublic(EventParametersPublic eventParameters) {
         checkStartEnd(eventParameters.getRangeStart(), eventParameters.getRangeEnd());
         List<Event> events = new ArrayList<>(eventRepository.searchEvent(eventParameters.getText(),
                 eventParameters.getCategories(),
                 eventParameters.getPaid(),
-                //eventParameters.getRangeStart(),
-                //eventParameters.getRangeEnd(),
                 eventParameters.getOnlyAvailable(),
                 PageRequest.of(eventParameters.getFrom() / eventParameters.getSize(), eventParameters.getSize())));
 
@@ -256,13 +253,9 @@ public class EventServiceImp implements EventService {
             eventStream = eventStream.filter(e -> !e.getEventDate().isAfter(eventParameters.getRangeEnd()));
         }
 
-
         List<EventFullDto> eventDtos = eventStream
                 .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
-
-
-
 //
 //        Map<Long, Long> views = defaultStatClientService.getEventsView(events);
         Map<Long, Long> confrimeds = getConfirmedRequests(events);
@@ -287,7 +280,7 @@ public class EventServiceImp implements EventService {
             }
         }
 
-        return  eventDtos; //eventDtos;
+        return eventDtos;
 
     }
 
