@@ -148,7 +148,7 @@ public class EventServiceImp implements EventService {
         if (eventOld.getAnnotation() != eventDto.getAnnotation() && eventDto.getAnnotation() != null) {
             eventOld.setAnnotation(eventDto.getAnnotation());
         }
-        if (eventOld.getParticipantLimit() != eventDto.getParticipantLimit() && eventDto.getParticipantLimit() != null) {
+        if (!Objects.equals(eventOld.getParticipantLimit(), eventDto.getParticipantLimit()) && eventDto.getParticipantLimit() != null) {
             eventOld.setParticipantLimit(eventDto.getParticipantLimit());
         }
         if (eventOld.getTitle() != eventDto.getTitle() && eventDto.getTitle() != null) {

@@ -22,6 +22,7 @@ import ru.practicum.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -146,7 +147,7 @@ public class RequestServiceImp implements RequestService {
     public List<RequestDto> getRequestsByUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User not found id = %d", userId)));
         return requestRepository.findAll().stream()
-                .filter(request -> request.getRequester().getId() == user.getId())
+                .filter(request -> Objects.equals(request.getRequester().getId(), user.getId()))
                 .map(RequestMapper::toDto)
                 .collect(Collectors.toList());
     }
