@@ -70,13 +70,11 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- Добавляем зависимость для HTTP клиента -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
         </dependency>
 
-        <!-- Jackson для обработки JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
