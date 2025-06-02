@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.model.EventParametersPublic;
 import ru.practicum.event.service.EventService;
+import ru.practicum.event.service.StatClientService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,9 +19,11 @@ import java.util.stream.Collectors;
 public class PublicEventsController {
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
     private final EventService eventService;
+    private final StatClientService statClientService;
 
-    public PublicEventsController(EventService eventService) {
+    public PublicEventsController(EventService eventService, StatClientService statClientService) {
         this.eventService = eventService;
+        this.statClientService = statClientService;
     }
 
     @GetMapping
@@ -34,7 +37,12 @@ public class PublicEventsController {
                                            @RequestParam(defaultValue = "0") Integer from,
                                            @RequestParam(defaultValue = "10") Integer size,
                                            HttpServletRequest request) {
-        log.info("Get public events from: " + from + " size: " + size);
+        log.info("Get public events from: {} size: {}", from, size);
+
+        if (statClientService != null) {
+            statClientService.createHit(request);
+        }
+
         EventParametersPublic eventParametersPublic = new EventParametersPublic();
         eventParametersPublic.setText(text);
         if (categories != null && categories.size() == 1 && categories.get(0) == 0L) {
@@ -56,7 +64,7 @@ public class PublicEventsController {
 
     @GetMapping("/{id}")
     public EventFullDto getEventPub(@PathVariable("id") Long id, HttpServletRequest request) {
-        log.info("Get public event id: " + id);
+        log.info("Get public event id: {}", id);
         EventFullDto eventFullDto = eventService.getEventPublic(id, request);
         return eventFullDto;
     }
