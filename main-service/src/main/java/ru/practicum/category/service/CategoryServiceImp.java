@@ -20,14 +20,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CategoryServiceImp implements CategoryService {
-    private static CategoryRepository categoryRepository;
-    private static CategoryMapper categoryMapper;
-    private static EventRepository eventRepository;
+    private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
+    private final EventRepository eventRepository;
 
     public CategoryServiceImp(CategoryRepository categoryRepository, CategoryMapper categoryMapper, EventRepository eventRepository) {
-        CategoryServiceImp.categoryRepository = categoryRepository;
-        CategoryServiceImp.categoryMapper = categoryMapper;
-        CategoryServiceImp.eventRepository = eventRepository;
+        this.categoryRepository = categoryRepository;
+        this.categoryMapper = categoryMapper;
+        this.eventRepository = eventRepository;
     }
 
     @Override
@@ -47,7 +47,7 @@ public class CategoryServiceImp implements CategoryService {
         if (category.getName().equals(categoryDto.getName()) && category.getId().equals(id)) {
             log.info("category update successful");
         } else {
-            if (checkNameEvent(categoryDto, Long.valueOf(id))) {
+            if (checkNameEvent(categoryDto, id)) {
                 throw new ConflictException("Сategory name exists!");
             }
         }
@@ -79,7 +79,7 @@ public class CategoryServiceImp implements CategoryService {
         boolean check = eventRepository.findAll().stream()
                 .map(Event::getCategory)
                 .map(Category::getId)
-                .anyMatch(ids -> id == ids);
+                .anyMatch(categoryId -> categoryId.equals(id));
         if (check) {
             throw new ConflictException("Category which have event");
         }
@@ -93,7 +93,7 @@ public class CategoryServiceImp implements CategoryService {
                 .anyMatch(name -> name.equals(categoryDtoIn.getName()));
     }
 
-    private boolean checkNameEvent(CategoryPostDto categoryDtoIn, Long ids) {
+    private boolean checkNameEvent(CategoryPostDto categoryDtoIn, Integer ids) {
         return categoryRepository.findAll().stream()
                 .anyMatch(category -> category.getName().equals(categoryDtoIn.getName())
                         && !Objects.equals(category.getId(), ids));
