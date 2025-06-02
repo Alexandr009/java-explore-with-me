@@ -13,6 +13,7 @@ import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public CategoryFullDto addCategory(CategoryPostDto categoryDto) {
         if (checkName(categoryDto)) {
-            throw new ConflictException("Сategory exists!");
+            throw new ConflictException("Сategory name exists!");
         }
         Category category = new Category();
         category.setName(categoryDto.getName());
@@ -41,9 +42,11 @@ public class CategoryServiceImp implements CategoryService {
     @Override
     public CategoryFullDto updateCategory(CategoryPostDto categoryDto, Integer id) {
         Category category = categoryRepository.findById(id).orElseThrow(()-> new NotFoundException(String.format("Category not found id - %s",id)));
-        if (!category.getId().equals(id) && !category.getName().equals(categoryDto.getName())) {
-            if (checkName(categoryDto)) {
-                throw new ConflictException("Сategory exists!");
+        if (category.getName().equals(categoryDto.getName()) && category.getId().equals(id)) {
+
+        } else {
+            if (checkNameEvent(categoryDto, Long.valueOf(id))) {
+                throw new ConflictException("Сategory name exists!");
             }
         }
 
@@ -87,5 +90,11 @@ public class CategoryServiceImp implements CategoryService {
         return categoryRepository.findAll().stream()
                 .map(Category::getName)
                 .anyMatch(name -> name.equals(categoryDtoIn.getName()));
+    }
+
+    private boolean checkNameEvent(CategoryPostDto categoryDtoIn, Long ids) {
+        return categoryRepository.findAll().stream()
+                .anyMatch(category -> category.getName().equals(categoryDtoIn.getName())
+                        && !Objects.equals(category.getId(), ids));
     }
 }
