@@ -3,12 +3,14 @@ package ru.practicum.service;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.StatisticDto;
 import ru.practicum.dto.StatisticInfoDto;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.mapper.Mapper;
 import ru.practicum.model.Statistic;
 import ru.practicum.repository.StatisticRepository;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +27,6 @@ public class StatisticServiceImp implements StatisticService {
 
     @Override
     public StatisticDto saveStatistic(StatisticDto statisticDto) {
-
         Statistic statistic = statisticRepository.save(mapper.mapStatistic(statisticDto));
         return mapper.mapStatisticDto(statistic);
     }
@@ -33,8 +34,21 @@ public class StatisticServiceImp implements StatisticService {
     @Override
     public List<StatisticInfoDto> getStatistic(String start, String end, List<String> uris, Boolean unique) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_PATTERN);
-        LocalDateTime startDate = LocalDateTime.parse(start, formatter);
-        LocalDateTime endDate = LocalDateTime.parse(end, formatter);
+
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        try {
+            startDate = LocalDateTime.parse(start, formatter);
+            endDate = LocalDateTime.parse(end, formatter);
+        } catch (DateTimeParseException e) {
+            throw new ValidationException("Invalid date format. Expected format: yyyy-MM-dd HH:mm:ss");
+        }
+
+        if (endDate.isBefore(startDate)) {
+            throw new ValidationException("End date cannot be before start date");
+        }
+
         List<StatisticInfoDto> listStatisticInfoDto;
 
         if (unique) {
@@ -43,8 +57,10 @@ public class StatisticServiceImp implements StatisticService {
             listStatisticInfoDto = statisticRepository.findByTimestampBetween(startDate, endDate);
         }
 
-        if (uris != null) {
-            listStatisticInfoDto = listStatisticInfoDto.stream().filter(item -> uris.contains(item.getUri())).collect(Collectors.toList());
+        if (uris != null && !uris.isEmpty()) {
+            listStatisticInfoDto = listStatisticInfoDto.stream()
+                    .filter(item -> uris.contains(item.getUri()))
+                    .collect(Collectors.toList());
         }
 
         listStatisticInfoDto = listStatisticInfoDto.stream()
@@ -53,5 +69,4 @@ public class StatisticServiceImp implements StatisticService {
 
         return listStatisticInfoDto;
     }
-
 }

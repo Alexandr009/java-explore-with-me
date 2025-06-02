@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.StatisticDto;
@@ -18,14 +19,14 @@ public class StatisticController {
     @Autowired
     public final StatisticServiceImp statisticService;
 
-
     public StatisticController(StatisticServiceImp statisticService) {
         this.statisticService = statisticService;
     }
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public StatisticDto createHit(@RequestBody StatisticDto statisticDto) {
-        log.info(String.format("Creating hit statistic statisticObject - %s", statisticDto.toString()));
+        log.info("Creating hit statistic statisticObject - {}", statisticDto.toString());
         return statisticService.saveStatistic(statisticDto);
     }
 
@@ -34,8 +35,7 @@ public class StatisticController {
                                                @RequestParam("end") String end,
                                                @RequestParam(value = "uris", required = false) List<String> uris,
                                                @RequestParam(value = "unique", defaultValue = "false") Boolean unique) {
-        log.info(String.format("Getting statistics start - %s, end - %s, uris - %s, unique - %s", start, end, uris, unique));
+        log.info("Getting statistics start - {}, end - {}, uris - {}, unique - {}", start, end, uris, unique);
         return statisticService.getStatistic(start, end, uris, unique);
     }
-
 }
