@@ -46,7 +46,7 @@ public class RequestServiceImp implements RequestService {
         }
 
         if (requestRepository.findByRequester_IdAndEvent_Id(userId, eventId) != null) {
-            throw new ValidationException(String.format("Duplicate request not allowed. Request already exists for eventId=%d, userId=%d", eventId, userId));
+            throw new ConflictException(String.format("Duplicate request not allowed. Request already exists for eventId=%d, userId=%d", eventId, userId));
         }
 
         Event event = eventRepository.findById(eventId)
@@ -56,11 +56,11 @@ public class RequestServiceImp implements RequestService {
                 .orElseThrow(() -> new NotFoundException(String.format("User with id=%d not found", userId)));
 
         if (event.getInitiator().getId().equals(userId)) {
-            throw new ValidationException(String.format("Event initiator cannot submit a participation request. eventId=%d, userId=%d", eventId, userId));
+            throw new ConflictException(String.format("Event initiator cannot submit a participation request. eventId=%d, userId=%d", eventId, userId));
         }
 
         if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new ValidationException(String.format("Event is not published. eventId=%d", eventId));
+            throw new ConflictException(String.format("Event is not published. eventId=%d", eventId));
         }
 
         if (event.getParticipantLimit() != 0 &&
@@ -117,7 +117,7 @@ public class RequestServiceImp implements RequestService {
         List<RequestDto> rejectedList = new ArrayList<>();
 
         if (event.getParticipantLimit() != 0 && event.getParticipantLimit() <= requestRepository.countAllByEventIdAndStatus(eventId, StatusRequest.CONFIRMED)) {
-            throw new ValidationException("Over limit");
+            throw new ConflictException("Over limit");
         }
 
         if (requestIds != null) {
@@ -125,7 +125,7 @@ public class RequestServiceImp implements RequestService {
                 Request request = requests.stream()
                         .filter(request1 -> request1.getId().equals(id)).findFirst().orElseThrow(() -> new NotFoundException(String.format("request id = %d not found", id)));
                 if (!request.getStatus().equals(StatusRequest.PENDING)) {
-                    throw new ValidationException("request cannot be confirmed");
+                    throw new ConflictException("request cannot be confirmed");
                 }
                 if (status.equals(StatusRequest.CONFIRMED)) {
                     request.setStatus(StatusRequest.CONFIRMED);
