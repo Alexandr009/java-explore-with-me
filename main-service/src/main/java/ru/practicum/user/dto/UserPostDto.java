@@ -12,7 +12,6 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserPostDto {
-    @NonNull
     @NotBlank
     @Size(min = 2, max = 250, message = "Name length must be between 2 and 250 characters.")
     String name;
