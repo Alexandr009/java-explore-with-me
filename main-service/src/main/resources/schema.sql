@@ -69,10 +69,9 @@ CREATE TABLE IF NOT EXISTS complication_events (
     CONSTRAINT FK_complication_events_events_id FOREIGN KEY (events_id) REFERENCES events (id) ON DELETE CASCADE
     );
 
-CREATE TABLE IF NOT EXISTS followers
-(
-    user_id     BIGINT NOT NULL,
-    follower_id BIGINT NOT NULL,
+CREATE TABLE IF NOT EXISTS followers (
+    user_id INTEGER NOT NULL,
+    follower_id INTEGER NOT NULL,
     CONSTRAINT PK_followers PRIMARY KEY (user_id, follower_id),
     CONSTRAINT FK_user_id_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT FK_follower_id_user_id FOREIGN KEY (follower_id) REFERENCES users (id) ON DELETE CASCADE
