@@ -417,7 +417,7 @@ public class EventServiceImp implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getSubscribedUsersEvents (Long userId, Integer from, Integer size) {
+    public List<EventFullDto> getSubscribedUsersEvents(Long userId, Integer from, Integer size) {
         if (size <= 0 || from < 0) {
             throw new ValidationException("From and size can't be less 0");
         }

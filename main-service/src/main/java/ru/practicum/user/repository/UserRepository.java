@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findAllOrderById();
 
     List<User> findUserByEmail(@NotNull @NotBlank @Email String email);
+
     @Query("SELECT u FROM User u WHERE :follower MEMBER OF u.follower")
     List<User> findUsersByFollowerContains(@Param("follower") User follower);
 }

@@ -2,9 +2,9 @@ package ru.practicum.user.mapper;
 
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
+import ru.practicum.user.dto.UserFollowersDto;
 import ru.practicum.user.dto.UserFullDto;
 import ru.practicum.user.model.User;
-import ru.practicum.user.dto.UserFollowersDto;
 
 import java.util.stream.Collectors;
 

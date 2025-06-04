@@ -4,11 +4,11 @@ package ru.practicum.user.service;
 import org.springframework.stereotype.Service;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.user.dto.UserFollowersDto;
 import ru.practicum.user.dto.UserFullDto;
 import ru.practicum.user.dto.UserPostDto;
 import ru.practicum.user.mapper.Mapper;
 import ru.practicum.user.model.User;
-import ru.practicum.user.dto.UserFollowersDto;
 import ru.practicum.user.model.UserParameters;
 import ru.practicum.user.repository.UserRepository;
 
@@ -36,7 +36,7 @@ public class UserServiceImp implements UserService {
             throw new ConflictException("User with this email already exists");
         }
 
-        return mapper.toUserFullDto(userRepository.save(user));
+        return Mapper.toUserFullDto(userRepository.save(user));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class UserServiceImp implements UserService {
                     .collect(Collectors.toList());
         }
 
-        List<UserFullDto> userFullDtos = user.stream().map(u -> mapper.toUserFullDto(u)).collect(Collectors.toList());
+        List<UserFullDto> userFullDtos = user.stream().map(u -> Mapper.toUserFullDto(u)).collect(Collectors.toList());
 
         return userFullDtos;
     }
@@ -72,9 +72,9 @@ public class UserServiceImp implements UserService {
     public UserFollowersDto addFollower(Long userId, Long followerId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
         User follower = userRepository.findById(followerId).orElseThrow(() -> new NotFoundException(String.format("follower id = %d not found", followerId)));
-        checkFollower(userId,followerId);
+        checkFollower(userId, followerId);
         user.getFollower().add(follower);
-        UserFollowersDto userFollowersDto = mapper.toUserFollowers(userRepository.save(user));
+        UserFollowersDto userFollowersDto = Mapper.toUserFollowers(userRepository.save(user));
 
         return userFollowersDto;
     }
@@ -82,7 +82,7 @@ public class UserServiceImp implements UserService {
     @Override
     public UserFollowersDto getUserFollowers(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
-        UserFollowersDto userFollowersDto = mapper.toUserFollowers(user);
+        UserFollowersDto userFollowersDto = Mapper.toUserFollowers(user);
         return userFollowersDto;
     }
 

@@ -10,9 +10,14 @@ import java.util.List;
 
 public interface UserService {
     UserFullDto createUser(UserPostDto userPostDto);
+
     List<UserFullDto> getUserByParameters(UserParameters userParameters);
+
     void deletedUser(Long userId);
+
     UserFollowersDto addFollower(Long userId, Long followerId);
+
     UserFollowersDto getUserFollowers(Long userId);
+
     void removeFollower(Long userId, Long followerId);
 }

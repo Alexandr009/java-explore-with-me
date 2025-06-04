@@ -3,14 +3,12 @@ package ru.practicum.event.controller;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventPatchDto;
 import ru.practicum.event.dto.EventPostDto;
 import ru.practicum.event.dto.EventRequestStatusUpdateDto;
-import ru.practicum.event.model.Event;
 import ru.practicum.event.service.EventService;
 import ru.practicum.request.dtro.RequestDto;
 import ru.practicum.request.dtro.RequestStatusUpdateDto;
@@ -89,9 +87,9 @@ public class PrivateEventsController {
     }
 
     @GetMapping("/{userId}/events/follower")
-    public List<EventFullDto> getSubscribedUserEvents (@PathVariable Long userId,
-                                                        @RequestParam(required = false, defaultValue = "0") Integer from,
-                                                        @RequestParam(required = false, defaultValue = "10") Integer size) {
+    public List<EventFullDto> getSubscribedUserEvents(@PathVariable Long userId,
+                                                      @RequestParam(required = false, defaultValue = "0") Integer from,
+                                                      @RequestParam(required = false, defaultValue = "10") Integer size) {
         log.info("Get subscribed user events {}", userId);
         List<EventFullDto> eventFullDtoList = eventService.getSubscribedUsersEvents(userId, from, size);
         return eventFullDtoList;
