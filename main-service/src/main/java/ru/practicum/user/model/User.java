@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -27,4 +29,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Integer id;
+
+    @ManyToMany
+    @JoinTable(name = "followers",
+            joinColumns = {@JoinColumn(name = "follower_id")},
+            inverseJoinColumns = {@JoinColumn(name = "user_id")})
+    private List<User> follower;
 }

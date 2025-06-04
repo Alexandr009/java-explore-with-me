@@ -8,6 +8,7 @@ import ru.practicum.user.dto.UserFullDto;
 import ru.practicum.user.dto.UserPostDto;
 import ru.practicum.user.mapper.Mapper;
 import ru.practicum.user.model.User;
+import ru.practicum.user.dto.UserFollowersDto;
 import ru.practicum.user.model.UserParameters;
 import ru.practicum.user.repository.UserRepository;
 
@@ -65,5 +66,37 @@ public class UserServiceImp implements UserService {
                 .findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
         userRepository.delete(user);
+    }
+
+    @Override
+    public UserFollowersDto addFollower(Long userId, Long followerId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
+        User follower = userRepository.findById(followerId).orElseThrow(() -> new NotFoundException(String.format("follower id = %d not found", followerId)));
+        checkFollower(userId,followerId);
+        user.getFollower().add(follower);
+        UserFollowersDto userFollowersDto = mapper.toUserFollowers(userRepository.save(user));
+
+        return userFollowersDto;
+    }
+
+    @Override
+    public UserFollowersDto getUserFollowers(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
+        UserFollowersDto userFollowersDto = mapper.toUserFollowers(user);
+        return userFollowersDto;
+    }
+
+    @Override
+    public void removeFollower(Long userId, Long followerId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
+        User follower = userRepository.findById(followerId).orElseThrow(() -> new NotFoundException(String.format("follower id = %d not found", followerId)));
+        user.getFollower().remove(follower);
+        userRepository.save(user);
+    }
+
+    private void checkFollower(Long userId, Long followerId) {
+        if (userId.equals(followerId)) {
+            throw new ConflictException("User cannot subscribe to himself");
+        }
     }
 }
