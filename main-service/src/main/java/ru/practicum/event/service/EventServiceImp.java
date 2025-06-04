@@ -418,17 +418,20 @@ public class EventServiceImp implements EventService {
 
     @Override
     public List<EventFullDto> getSubscribedUsersEvents (Long userId, Integer from, Integer size) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
-        List<Event> events = eventRepository.findAllByInitiatorIdAndState(userId, EventState.PUBLISHED, PageRequest.of(from / size, size));
-        if (events.isEmpty()) {
-            throw new NotFoundException(String.format("Event with id = %d not found", userId));
+        if (size <= 0 || from < 0) {
+            throw new ValidationException("From and size can't be less 0");
         }
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(String.format("User id = %d not found", userId)));
+        List<Event> events = eventRepository.findAllByInitiatorIdAndState(userId.intValue(), EventState.PUBLISHED, PageRequest.of(from / size, size));
         List<EventFullDto> eventFullDtoList = events.stream().map(eventMapper::toEventFullDto).collect(Collectors.toList());
         return eventFullDtoList;
     }
 
     @Override
     public List<EventFullDto> getSubscribedAllUsersEvents(Long followerId, Integer from, Integer size) {
+        if (size <= 0 || from < 0) {
+            throw new ValidationException("From and size can't be less 0");
+        }
         User follower = userRepository.findById(followerId)
                 .orElseThrow(() -> new NotFoundException(String.format("follower id = %d not found", followerId)));
 

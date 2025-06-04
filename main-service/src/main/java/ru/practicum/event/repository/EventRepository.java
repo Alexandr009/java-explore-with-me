@@ -44,7 +44,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                           @Param("states") List<EventState> states,
                           @Param("categoryIds") List<Integer> categoryIds);
 
-    List<Event> findAllByInitiatorIdAndState(Long userId, EventState eventState, PageRequest of);
+    List<Event> findAllByInitiatorIdAndState(Integer userId, EventState eventState, PageRequest of);
 
     @Query("SELECT e FROM Event e WHERE e.initiator.id IN :userIds AND e.state = :state ORDER BY e.eventDate DESC")
     List<Event> findAllByInitiatorIdInAndStateOrderByEventDateDesc(
