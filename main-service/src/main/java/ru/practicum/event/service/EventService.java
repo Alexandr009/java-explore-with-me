@@ -26,4 +26,8 @@ public interface EventService {
     EventFullDto getEventPublic(Long eventId, HttpServletRequest request);
 
     EventFullDto updateEventPrivate(Long userId, EventPatchDto eventDto, Long eventId);
+
+    List<EventFullDto> getSubscribedUsersEvents(Long userId, Integer from, Integer size);
+
+    List<EventFullDto> getSubscribedAllUsersEvents(Long followerId, Integer from, Integer size);
 }

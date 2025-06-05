@@ -1,6 +1,7 @@
 package ru.practicum.event.repository;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -43,4 +44,16 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                           @Param("states") List<EventState> states,
                           @Param("categoryIds") List<Integer> categoryIds);
 
+    List<Event> findAllByInitiatorIdAndState(Integer userId, EventState eventState, PageRequest of);
+
+    @Query("SELECT e FROM Event e WHERE e.initiator.id IN :userIds AND e.state = :state ORDER BY e.eventDate DESC")
+    List<Event> findAllByInitiatorIdInAndStateOrderByEventDateDesc(
+            @Param("userIds") List<Long> userIds,
+            @Param("state") EventState state,
+            Pageable pageable);
+
+    List<Event> findAllByInitiator_IdInAndStateOrderByEventDateDesc(
+            List<Long> initiatorIds,
+            EventState state,
+            Pageable pageable);
 }
