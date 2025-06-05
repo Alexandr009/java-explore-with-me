@@ -17,26 +17,26 @@ public class FollowerController {
         this.userService = userService;
     }
 
-    @PostMapping("/{userId}/follower/{followerId}")
+    @PostMapping("/{user-Id}/followers/{follower-Id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserFollowersDto addFollower(@PathVariable Long userId,
-                                        @PathVariable Long followerId) {
+    public UserFollowersDto addFollower(@PathVariable("user-Id") Long userId,
+                                        @PathVariable("follower-Id") Long followerId) {
         log.info("Adding follower {} to user {}", followerId, userId);
         UserFollowersDto userFollowersDto = userService.addFollower(userId, followerId);
         return userFollowersDto;
     }
 
-    @GetMapping("/{userId}/follower")
-    public UserFollowersDto getFollowers(@PathVariable Long userId) {
+    @GetMapping("/{user-Id}/followers")
+    public UserFollowersDto getFollowers(@PathVariable("user-Id") Long userId) {
         log.info("Getting followers {}", userId);
         UserFollowersDto userFollowersDto = userService.getUserFollowers(userId);
         return userFollowersDto;
     }
 
-    @DeleteMapping("/{userId}/follower/{followerId}")
+    @DeleteMapping("/{user-Id}/followers/{follower-Id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteFollower(@PathVariable Long userId,
-                               @PathVariable Long followerId) {
+    public void deleteFollower(@PathVariable("user-Id") Long userId,
+                               @PathVariable("follower-Id") Long followerId) {
         log.info("Deleting follower {} from user {}", followerId, userId);
         userService.removeFollower(userId, followerId);
     }

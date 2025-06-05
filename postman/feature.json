@@ -42,7 +42,7 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/follower/:followerId",
+          "raw": "http://localhost:8080/users/:user-Id/followers/:follower-Id",
           "protocol": "http",
           "host": [
             "localhost"
@@ -50,17 +50,17 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
-            "follower",
-            ":followerId"
+            ":user-Id",
+            "followers",
+            ":follower-Id"
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "1"
             },
             {
-              "key": "followerId",
+              "key": "follower-Id",
               "value": "2"
             }
           ]
@@ -87,7 +87,7 @@
         "method": "POST",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/follower/:followerId",
+          "raw": "http://localhost:8080/users/:user-Id/followers/:follower-Id",
           "protocol": "http",
           "host": [
             "localhost"
@@ -95,17 +95,17 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
-            "follower",
-            ":followerId"
+            ":user-Id",
+            "followers",
+            ":follower-Id"
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "1"
             },
             {
-              "key": "followerId",
+              "key": "follower-Id",
               "value": "1"
             }
           ]
@@ -144,7 +144,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/follower",
+          "raw": "http://localhost:8080/users/:user-Id/followers",
           "protocol": "http",
           "host": [
             "localhost"
@@ -152,12 +152,12 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
-            "follower"
+            ":user-Id",
+            "followers"
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "1"
             }
           ]
@@ -191,7 +191,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/events/follower?from=0&size=10",
+          "raw": "http://localhost:8080/users/:user-Id/events/followers?from=0&size=10",
           "protocol": "http",
           "host": [
             "localhost"
@@ -199,9 +199,9 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
+            ":user-Id",
             "events",
-            "follower"
+            "followers"
           ],
           "query": [
             {
@@ -215,7 +215,7 @@
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "1"
             }
           ]
@@ -249,7 +249,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/events/:followerId/follower?from=0&size=10",
+          "raw": "http://localhost:8080/users/events/:follower-Id/followers?from=0&size=10",
           "protocol": "http",
           "host": [
             "localhost"
@@ -258,8 +258,8 @@
           "path": [
             "users",
             "events",
-            ":followerId",
-            "follower"
+            ":follower-Id",
+            "followers"
           ],
           "query": [
             {
@@ -273,7 +273,7 @@
           ],
           "variable": [
             {
-              "key": "followerId",
+              "key": "follower-Id",
               "value": "2"
             }
           ]
@@ -300,7 +300,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/events/follower?from=-1&size=10",
+          "raw": "http://localhost:8080/users/:user-Id/events/followers?from=-1&size=10",
           "protocol": "http",
           "host": [
             "localhost"
@@ -308,9 +308,9 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
+            ":user-Id",
             "events",
-            "follower"
+            "followers"
           ],
           "query": [
             {
@@ -324,7 +324,7 @@
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "1"
             }
           ]
@@ -351,7 +351,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/events/:followerId/follower?from=0&size=0",
+          "raw": "http://localhost:8080/users/events/:follower-Id/followers?from=0&size=0",
           "protocol": "http",
           "host": [
             "localhost"
@@ -360,8 +360,8 @@
           "path": [
             "users",
             "events",
-            ":followerId",
-            "follower"
+            ":follower-Id",
+            "followers"
           ],
           "query": [
             {
@@ -375,7 +375,7 @@
           ],
           "variable": [
             {
-              "key": "followerId",
+              "key": "follower-Id",
               "value": "2"
             }
           ]
@@ -402,7 +402,7 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/events/follower?from=0&size=10",
+          "raw": "http://localhost:8080/users/:user-Id/events/followers?from=0&size=10",
           "protocol": "http",
           "host": [
             "localhost"
@@ -410,9 +410,9 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
+            ":user-Id",
             "events",
-            "follower"
+            "followers"
           ],
           "query": [
             {
@@ -426,7 +426,7 @@
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "999"
             }
           ]
@@ -453,7 +453,7 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/follower/:followerId",
+          "raw": "http://localhost:8080/users/:user-Id/followers/:follower-Id",
           "protocol": "http",
           "host": [
             "localhost"
@@ -461,17 +461,17 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
-            "follower",
-            ":followerId"
+            ":user-Id",
+            "followers",
+            ":follower-Id"
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "1"
             },
             {
-              "key": "followerId",
+              "key": "follower-Id",
               "value": "2"
             }
           ]
@@ -498,7 +498,7 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "http://localhost:8080/users/:userId/follower/:followerId",
+          "raw": "http://localhost:8080/users/:user-Id/followers/:follower-Id",
           "protocol": "http",
           "host": [
             "localhost"
@@ -506,17 +506,17 @@
           "port": "8080",
           "path": [
             "users",
-            ":userId",
-            "follower",
-            ":followerId"
+            ":user-Id",
+            "followers",
+            ":follower-Id"
           ],
           "variable": [
             {
-              "key": "userId",
+              "key": "user-Id",
               "value": "1"
             },
             {
-              "key": "followerId",
+              "key": "follower-Id",
               "value": "999"
             }
           ]

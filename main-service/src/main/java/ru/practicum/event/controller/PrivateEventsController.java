@@ -86,17 +86,17 @@ public class PrivateEventsController {
         return requestDto;
     }
 
-    @GetMapping("/{userId}/events/follower")
-    public List<EventFullDto> getSubscribedUserEvents(@PathVariable Long userId,
+    @GetMapping("/{user-Id}/events/followers")
+    public List<EventFullDto> getSubscribedUserEvents(@PathVariable("user-Id") Long userId,
                                                       @RequestParam(required = false, defaultValue = "0") Integer from,
                                                       @RequestParam(required = false, defaultValue = "10") Integer size) {
         log.info("Get subscribed user events {}", userId);
-        List<EventFullDto> eventFullDtoList = eventService.getSubscribedUsersEvents(userId, from, size);
+        List<EventFullDto> eventFullDtoList = eventService.getSubscribedAllUsersEvents(userId, from, size);
         return eventFullDtoList;
     }
 
-    @GetMapping("/events/{followerId}/follower")
-    public List<EventFullDto> getSubscribedAllUsersEvents(@PathVariable Long followerId,
+    @GetMapping("/events/{follower-Id}/followers")
+    public List<EventFullDto> getSubscribedAllUsersEvents(@PathVariable("follower-Id") Long followerId,
                                                           @RequestParam(required = false, defaultValue = "0") Integer from,
                                                           @RequestParam(required = false, defaultValue = "10") Integer size) {
         log.info("Get subscribed users events {}", followerId);

@@ -1,7 +1,6 @@
 # java-explore-with-me
 
 
-
 # Feature: Subscriptions - Подписки на других пользователей
 
 ## Pull Request
@@ -19,17 +18,17 @@
 #### Добавить подписку
 
 ```
-POST /users/{userId}/follower/{followerId}
+POST /users/{user-Id}/followers/{follower-Id}
 ```
 
-Добавляет пользователя `followerId` в список подписчиков пользователя `userId`.
+Добавляет пользователя `follower-Id` в список подписчиков пользователя `user-Id`.
 
 **Ответ:**`201 Created` - объект `UserFollowersDto` с информацией о пользователе и его подписчиках.
 
 #### Получить подписчиков пользователя
 
 ```
-GET /users/{userId}/follower
+GET /users/{user-Id}/followers
 ```
 
 Возвращает список подписчиков указанного пользователя.
@@ -39,10 +38,10 @@ GET /users/{userId}/follower
 #### Удалить подписку
 
 ```
-DELETE /users/{userId}/follower/{followerId}
+DELETE /users/{user-Id}/followers/{follower-Id}
 ```
 
-Удаляет пользователя `followerId` из списка подписчиков пользователя `userId`.
+Удаляет пользователя `follower-Id` из списка подписчиков пользователя `user-Id`.
 
 **Ответ:**`204 No Content`.
 
@@ -51,7 +50,7 @@ DELETE /users/{userId}/follower/{followerId}
 #### Получить события пользователя (для подписчика)
 
 ```
-GET /users/{userId}/events/follower?from={from}&size={size}
+GET /users/{user-Id}/events/followers?from={from}&size={size}
 ```
 
 Возвращает опубликованные события указанного пользователя с пагинацией.
@@ -66,10 +65,10 @@ GET /users/{userId}/events/follower?from={from}&size={size}
 #### Получить события всех подписок
 
 ```
-GET /users/events/{followerId}/follower?from={from}&size={size}
+GET /users/events/{follower-Id}/followers?from={from}&size={size}
 ```
 
-Возвращает события всех пользователей, на которых подписан `followerId`.
+Возвращает события всех пользователей, на которых подписан `follower-Id`.
 
 **Параметры:**
 
@@ -127,19 +126,19 @@ GET /users/events/{followerId}/follower?from={from}&size={size}
 ### Подписаться на пользователя
 
 ```bash
-curl -X POST "http://localhost:8080/users/1/follower/2"
+curl -X POST "http://localhost:8080/users/1/followers/2"
 ```
 
 ### Получить новостную ленту
 
 ```bash
-curl "http://localhost:8080/users/events/2/follower?from=0&size=10"
+curl "http://localhost:8080/users/events/2/followers?from=0&size=10"
 ```
 
 ### Отписаться от пользователя
 
 ```bash
-curl -X DELETE "http://localhost:8080/users/1/follower/2"
+curl -X DELETE "http://localhost:8080/users/1/followers/2"
 ```
 
 ## Техническая реализация
